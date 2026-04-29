@@ -1,0 +1,29 @@
+{
+  "version": 1,
+  "skills": {
+    "openspec": {
+      "source": "itechmeat/llm-code",
+      "sourceType": "github",
+      "skillPath": "skills/openspec/SKILL.md",
+      "computedHash": "9a4795241089283a465e201b62ce52731a493f94eb03c0255614f18d7026e346"
+    },
+    "scss-best-practices": {
+      "source": "mindrally/skills",
+      "sourceType": "github",
+      "skillPath": "scss-best-practices/SKILL.md",
+      "computedHash": "699729dff09e50495891b6956cffdbd148724f8f4cd4668e91c0e3d5b37084ce"
+    },
+    "tanstack-query": {
+      "source": "tanstack-skills/tanstack-skills",
+      "sourceType": "github",
+      "skillPath": "plugins/tanstack-query/skills/tanstack-query/SKILL.md",
+      "computedHash": "bfe2977e92667b84efeb4b12e5c3010807934aab2f7ac2b059241cd3da2a3e6e"
+    },
+    "vercel-react-best-practices": {
+      "source": "vercel-labs/agent-skills",
+      "sourceType": "github",
+      "skillPath": "skills/react-best-practices/SKILL.md",
+      "computedHash": "6b526d013e28073246a36f99b529bc43745d30832ecfa8217b359c34f260ca6b"
+    }
+  }
+}
