@@ -1,0 +1,1706 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Outside-In Diligence Tool — AlixPartners</title>
+  <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.14.1/dist/cdn.min.js" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/pptxgenjs@3.12.0/dist/pptxgen.bundle.js"></script>
+  <style>
+    [x-cloak] { display: none !important; }
+    *, *::before, *::after { box-sizing: border-box; }
+    body { font-family: 'Segoe UI', Arial, sans-serif; font-size: 14px; color: #212529; background: #f7f7f7; margin: 0; }
+
+    /* Navbar */
+    .navbar { background: #333; padding: 0 24px; height: 52px; display: flex; align-items: center; border-bottom: 3px solid #498E2B; }
+    .navbar-brand { color: #fff; font-size: 15px; font-weight: 600; letter-spacing: .02em; }
+    .navbar-brand .dot { color: #5CB335; margin-right: 8px; }
+    .navbar-sub { color: #aaa; font-size: 13px; margin-left: 16px; padding-left: 16px; border-left: 1px solid #555; }
+
+    /* Layout */
+    .container { max-width: 1120px; margin: 0 auto; padding: 24px 16px; }
+
+    /* Tabs */
+    .tabs { display: flex; border-bottom: 2px solid #dee2e6; margin-bottom: 24px; }
+    .tab-btn { padding: 10px 20px; border: none; background: none; cursor: pointer; font-size: 14px; color: #6c757d; border-bottom: 3px solid transparent; margin-bottom: -2px; font-weight: 500; transition: color .15s; }
+    .tab-btn:hover { color: #498E2B; }
+    .tab-btn.active { color: #498E2B; border-bottom-color: #498E2B; font-weight: 600; }
+    .badge { display: inline-block; font-size: 10px; padding: 1px 6px; border-radius: 10px; margin-left: 5px; font-weight: 700; }
+    .badge-green { background: #5CB335; color: #fff; }
+    .badge-warn { background: #ffc107; color: #333; }
+
+    /* Cards */
+    .card { background: #fff; border-radius: 8px; padding: 20px; box-shadow: 0 1px 3px rgba(0,0,0,.08); margin-bottom: 16px; }
+    .card-title { font-size: 11px; font-weight: 700; color: #6c757d; text-transform: uppercase; letter-spacing: .06em; margin-bottom: 14px; }
+
+    /* Metrics strip */
+    .metrics { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 12px; margin-bottom: 16px; }
+    .metric { background: #fff; border-radius: 8px; padding: 16px 18px; box-shadow: 0 1px 3px rgba(0,0,0,.08); border-left: 3px solid #498E2B; }
+    .metric.accent { border-left-color: #e67e22; }
+    .metric-label { font-size: 11px; color: #6c757d; text-transform: uppercase; letter-spacing: .05em; margin-bottom: 4px; }
+    .metric-value { font-size: 22px; font-weight: 700; color: #212529; line-height: 1.2; }
+    .metric-sub { font-size: 11px; color: #aaa; margin-top: 3px; }
+
+    /* Ratio metric (dark green) */
+    .metric-ratio { background: linear-gradient(135deg,#498E2B,#5CB335); color: #fff; border-radius: 8px; padding: 16px 18px; }
+    .metric-ratio .metric-label { color: rgba(255,255,255,.75); }
+    .metric-ratio .metric-value { font-size: 24px; color: #fff; }
+
+    /* Charts */
+    .charts-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px; }
+    @media (max-width: 700px) { .charts-grid { grid-template-columns: 1fr; } }
+
+    /* Upload zone */
+    .upload-zone { border: 2px dashed #dee2e6; border-radius: 8px; padding: 56px 24px; text-align: center; cursor: pointer; background: #fff; transition: all .2s; }
+    .upload-zone:hover, .upload-zone.dragging { border-color: #498E2B; background: #f0f9eb; }
+    .upload-icon { font-size: 42px; margin-bottom: 12px; }
+    .upload-title { font-size: 15px; font-weight: 600; color: #333; margin-bottom: 4px; }
+    .upload-sub { font-size: 12px; color: #aaa; margin-bottom: 16px; }
+    .upload-hint { font-size: 11px; color: #bbb; margin-top: 8px; }
+
+    /* Buttons */
+    .btn { padding: 8px 20px; background: #498E2B; color: #fff; border: none; border-radius: 4px; font-size: 13px; font-weight: 600; cursor: pointer; transition: background .15s; }
+    .btn:hover { background: #3d7623; }
+    .btn:disabled { background: #aaa; cursor: not-allowed; }
+    .btn-outline { background: #fff; color: #498E2B; border: 1px solid #498E2B; }
+    .btn-outline:hover { background: #f0f9eb; }
+    .btn-link { background: none; border: none; color: #498E2B; font-size: 12px; cursor: pointer; text-decoration: underline; padding: 0; }
+
+    /* Form */
+    .input-group { display: flex; gap: 8px; align-items: center; margin-bottom: 8px; }
+    .form-control { padding: 8px 12px; border: 1px solid #dee2e6; border-radius: 4px; font-size: 14px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; }
+    .form-control:focus { outline: none; border-color: #498E2B; }
+
+    /* Alerts */
+    .alert { padding: 10px 14px; border-radius: 4px; margin-bottom: 12px; font-size: 13px; }
+    .alert-danger { background: #fff0f0; border-left: 3px solid #e53e3e; color: #742a2a; }
+
+    /* Mode toggle */
+    .mode-toggle { display: flex; border: 1px solid #dee2e6; border-radius: 4px; overflow: hidden; width: fit-content; margin-bottom: 14px; }
+    .mode-btn { padding: 7px 18px; background: #fff; border: none; border-right: 1px solid #dee2e6; cursor: pointer; font-size: 12px; font-weight: 600; color: #6c757d; transition: all .15s; }
+    .mode-btn:last-child { border-right: none; }
+    .mode-btn.active { background: #498E2B; color: #fff; }
+    /* Paste zone */
+    .paste-zone { border: 2px dashed #dee2e6; border-radius: 8px; background: #fff; cursor: text; transition: border-color .2s, background .2s; }
+    .paste-zone:focus { outline: none; border-color: #498E2B; background: #f0f9eb; }
+    .paste-preview-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:10px; font-size:13px; }
+    .col-pill { display:inline-block; font-size:10px; padding:2px 7px; border-radius:10px; margin-right:4px; font-weight:600; }
+    .col-found { background:#e8f5e9; color:#2d6016; }
+    .col-missing { background:#fff0f0; color:#b91c1c; }
+    /* Manual form */
+    .manual-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .form-group { display: flex; flex-direction: column; gap: 3px; }
+    .form-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .05em; color: #6c757d; }
+    .form-input { padding: 7px 10px; border: 1px solid #dee2e6; border-radius: 4px; font-size: 13px; width: 100%; }
+    .form-input:focus { outline: none; border-color: #498E2B; }
+    .form-hint { font-size: 10px; color: #aaa; margin-top: 2px; }
+
+    /* Table */
+    .data-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    .data-table th { text-align: left; padding: 8px 12px; border-bottom: 2px solid #dee2e6; font-size: 11px; text-transform: uppercase; letter-spacing: .05em; color: #6c757d; font-weight: 700; }
+    .data-table td { padding: 8px 12px; border-bottom: 1px solid #f0f0f0; }
+    .data-table tr:hover td { background: #fafafa; }
+    .progress-bar { height: 5px; background: #e9ecef; border-radius: 3px; overflow: hidden; width: 100px; }
+    .progress-fill { height: 100%; background: #5CB335; }
+
+    /* Empty state */
+    .empty-state { text-align: center; padding: 64px 24px; }
+    .empty-icon { font-size: 48px; color: #dee2e6; margin-bottom: 16px; }
+    .empty-title { font-size: 15px; font-weight: 600; color: #555; margin-bottom: 6px; }
+    .empty-sub { font-size: 13px; color: #aaa; margin-bottom: 20px; }
+    .checklist { display: inline-flex; flex-direction: column; gap: 6px; }
+    .check-item { padding: 7px 14px; border-radius: 4px; font-size: 13px; text-align: left; }
+    .check-item.done { background: #e8f5e9; color: #2d6016; }
+    .check-item.todo { background: #f5f5f5; color: #888; }
+
+    /* Spinner */
+    .spinner { display: inline-block; width: 16px; height: 16px; border: 2px solid rgba(255,255,255,.35); border-top-color: #fff; border-radius: 50%; animation: spin .7s linear infinite; vertical-align: middle; margin-right: 6px; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* Company card */
+    .company-header { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
+    .company-ticker { font-size: 26px; font-weight: 800; color: #333; }
+    .company-name { font-size: 13px; color: #6c757d; margin-top: 2px; }
+    .source-pill { background: #e8f5e9; color: #2d6016; font-size: 11px; font-weight: 700; padding: 3px 9px; border-radius: 12px; margin-left: auto; }
+
+    /* Insights grid */
+    .insights-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    @media (max-width: 600px) { .insights-grid { grid-template-columns: 1fr; } }
+    .insight-label { font-size: 11px; text-transform: uppercase; letter-spacing: .05em; color: #6c757d; margin-bottom: 4px; font-weight: 700; }
+    .insight-value { font-size: 17px; font-weight: 700; color: #333; }
+    .insight-sub { font-size: 12px; color: #aaa; margin-top: 2px; }
+
+    /* File info bar */
+    .file-bar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; padding: 8px 12px; background: #f0f9eb; border-radius: 4px; font-size: 13px; }
+
+    /* Step bar */
+    .step-bar { display: flex; align-items: flex-start; margin-bottom: 28px; padding: 20px 28px; background: #fff; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,.08); }
+    .step-item { display: flex; flex-direction: column; align-items: center; cursor: pointer; min-width: 90px; }
+    .step-item.locked { cursor: not-allowed; opacity: .45; pointer-events: none; }
+    .step-num-wrap { width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 14px; border: 2px solid #dee2e6; background: #fff; color: #aaa; margin-bottom: 6px; transition: all .2s; }
+    .step-item.active .step-num-wrap { background: #498E2B; border-color: #498E2B; color: #fff; }
+    .step-item.done .step-num-wrap { background: #e8f5e9; border-color: #5CB335; color: #2d6016; }
+    .step-label-text { font-size: 12px; font-weight: 600; color: #aaa; text-align: center; line-height: 1.3; }
+    .step-item.active .step-label-text { color: #498E2B; }
+    .step-item.done .step-label-text { color: #2d6016; }
+    .step-status { font-size: 10px; color: #aaa; margin-top: 3px; }
+    .step-connector { flex: 1; height: 2px; background: #dee2e6; margin: 17px 10px 0; }
+    .step-connector.done { background: #5CB335; }
+
+    /* Step navigation */
+    .step-nav { display: flex; justify-content: space-between; align-items: center; margin-top: 24px; padding-top: 16px; border-top: 1px solid #f0f0f0; }
+
+    /* AI narrative card */
+    .ai-card { background: #f8fdf5; border: 1px solid #c8e6c9; border-radius: 8px; padding: 20px; margin-bottom: 16px; }
+    .ai-card-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+    .ai-card-title { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: #498E2B; }
+    .ai-narrative-text { font-size: 13px; line-height: 1.75; color: #333; white-space: pre-wrap; }
+    .ai-placeholder { font-size: 13px; color: #aaa; font-style: italic; }
+    .q-chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 14px; padding-top: 12px; border-top: 1px solid #dcedc8; }
+    .q-chip { padding: 5px 12px; background: #fff; border: 1px solid #c8e6c9; border-radius: 20px; font-size: 12px; color: #498E2B; cursor: pointer; transition: all .15s; }
+    .q-chip:hover { background: #498E2B; color: #fff; border-color: #498E2B; }
+    .chat-msgs { margin-top: 12px; padding-top: 12px; border-top: 1px solid #dcedc8; display: flex; flex-direction: column; gap: 8px; }
+    .chat-bubble { padding: 8px 13px; border-radius: 8px; font-size: 13px; line-height: 1.55; max-width: 92%; }
+    .chat-bubble.q { background: #fff; border: 1px solid #dee2e6; align-self: flex-end; color: #333; }
+    .chat-bubble.a { background: #e8f5e9; color: #1a3d0e; align-self: flex-start; }
+
+    /* Modal */
+    .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,.45); z-index: 200; display: flex; align-items: center; justify-content: center; }
+    .modal-box { background: #fff; border-radius: 10px; padding: 28px 28px 22px; max-width: 440px; width: 90%; box-shadow: 0 8px 32px rgba(0,0,0,.2); }
+    .modal-icon { font-size: 30px; margin-bottom: 10px; }
+    .modal-title { font-size: 16px; font-weight: 700; color: #333; margin-bottom: 8px; }
+    .modal-body { font-size: 13px; color: #555; line-height: 1.65; margin-bottom: 20px; }
+    .modal-footer { display: flex; justify-content: flex-end; }
+  </style>
+</head>
+<body x-data="app()" x-cloak>
+
+  <div class="navbar">
+    <span class="navbar-brand"><span class="dot">●</span>AlixPartners</span>
+    <span class="navbar-sub">Outside-In Diligence Tool</span>
+  </div>
+
+  <div class="container">
+
+    <!-- Step progress bar -->
+    <div class="step-bar">
+      <div class="step-item" :class="{ active: step===1, done: roster.loaded && step!==1 }" @click="goStep(1)">
+        <div class="step-num-wrap" x-text="roster.loaded && step!==1 ? '✓' : '1'"></div>
+        <div class="step-label-text">Roster Analysis</div>
+        <div class="step-status" x-show="roster.loaded && step!==1">Loaded</div>
+      </div>
+      <div class="step-connector" :class="{ done: roster.loaded }"></div>
+      <div class="step-item" :class="{ active: step===2, done: financials.loaded && step!==2 }" @click="goStep(2)">
+        <div class="step-num-wrap" x-text="financials.loaded && step!==2 ? '✓' : '2'"></div>
+        <div class="step-label-text">Financial Data</div>
+        <div class="step-status" x-show="financials.loaded && step!==2">Loaded</div>
+      </div>
+      <div class="step-connector" :class="{ done: roster.loaded && financials.loaded }"></div>
+      <div class="step-item" :class="{ active: step===3, locked: !roster.loaded || !financials.loaded }" @click="goStep(3)">
+        <div class="step-num-wrap">3</div>
+        <div class="step-label-text">Integrated Analysis</div>
+        <div class="step-status" x-show="!roster.loaded || !financials.loaded" style="color:#f59e0b;">needs data</div>
+        <div class="step-status" x-show="roster.loaded && financials.loaded && step!==3" style="color:#2d6016;">Ready</div>
+      </div>
+    </div>
+
+    <!-- ===== STEP 1: ROSTER ===== -->
+    <div x-show="step === 1">
+
+      <!-- Empty state — two paths -->
+      <div x-show="!roster.loaded">
+
+        <div class="mode-toggle">
+          <button class="mode-btn" :class="{active: roster.mode==='upload'}" @click="roster.mode='upload'">Upload File</button>
+          <button class="mode-btn" :class="{active: roster.mode==='paste'}" @click="roster.mode='paste'">Paste from Spreadsheet</button>
+        </div>
+
+        <!-- PATH A: Upload file -->
+        <div x-show="roster.mode === 'upload'">
+          <input type="file" id="fileInput" accept=".xlsx,.xls" style="display:none" @change="handleFile($event)">
+          <div class="upload-zone"
+               :class="{dragging: roster.dragging}"
+               @dragover.prevent="roster.dragging=true"
+               @dragleave="roster.dragging=false"
+               @drop.prevent="handleDrop($event)"
+               @click="document.getElementById('fileInput').click()">
+            <div class="upload-icon">📊</div>
+            <div class="upload-title">Upload LinkedIn Roster Export</div>
+            <div class="upload-sub">Drop an Excel file here or click to browse<br>Expected: Job Function · Seniority · Country · Fully Loaded Cost</div>
+            <button class="btn" @click.stop="document.getElementById('fileInput').click()">Choose File</button>
+          </div>
+          <p style="text-align:center; margin-top:10px;">
+            <button class="btn-link" @click="loadDemoRoster()">Use demo data instead</button>
+          </p>
+        </div>
+
+        <!-- PATH B: Paste from spreadsheet -->
+        <div x-show="roster.mode === 'paste'">
+
+          <!-- Before paste: paste target -->
+          <div x-show="!roster.paste.raw">
+            <div class="paste-zone" tabindex="0" @paste="handlePasteData($event)">
+              <div style="padding:52px 24px; text-align:center; pointer-events:none;">
+                <div style="font-size:38px; margin-bottom:12px;">📋</div>
+                <div style="font-size:15px; font-weight:600; color:#333; margin-bottom:6px;">Click here, then paste your data</div>
+                <div style="font-size:12px; color:#888;">Select the rows in your Excel file (including the header row), copy with Ctrl+C, then press Ctrl+V here</div>
+                <div style="font-size:11px; color:#bbb; margin-top:10px;">Expected columns: Job Function · Seniority · Country · Fully Loaded Cost</div>
+              </div>
+            </div>
+            <p style="text-align:center; margin-top:10px;">
+              <button class="btn-link" @click="loadDemoRoster()">Use demo data instead</button>
+            </p>
+          </div>
+
+          <!-- After paste: column detection + preview -->
+          <div x-show="roster.paste.raw">
+
+            <!-- Detection status -->
+            <div class="paste-preview-header">
+              <div>
+                <strong x-text="roster.paste.raw?.length"></strong> rows detected &nbsp;·&nbsp;
+                <span x-text="roster.paste.headers?.length"></span> columns
+              </div>
+              <button class="btn-link" @click="roster.paste = {raw:null,headers:null,preview:null}">↩ Paste again</button>
+            </div>
+
+            <!-- Column mapping status -->
+            <div style="margin-bottom:12px;">
+              <template x-for="col in pasteColStatus()" :key="col.label">
+                <span class="col-pill" :class="col.found ? 'col-found' : 'col-missing'"
+                      x-text="(col.found ? '✓ ' : '✗ ') + col.label"></span>
+              </template>
+            </div>
+
+            <!-- Preview grid -->
+            <div class="card" style="overflow-x:auto; padding:0;">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <template x-for="h in roster.paste.headers" :key="h">
+                      <th x-text="h"></th>
+                    </template>
+                  </tr>
+                </thead>
+                <tbody>
+                  <template x-for="(row, i) in roster.paste.preview" :key="i">
+                    <tr>
+                      <template x-for="h in roster.paste.headers" :key="h">
+                        <td x-text="row[h]"></td>
+                      </template>
+                    </tr>
+                  </template>
+                </tbody>
+              </table>
+              <div x-show="roster.paste.raw?.length > 4"
+                   style="padding:8px 12px; font-size:11px; color:#aaa; border-top:1px solid #f0f0f0;">
+                Showing 4 of <span x-text="roster.paste.raw?.length"></span> rows
+              </div>
+            </div>
+
+            <div style="margin-top:12px; display:flex; gap:8px; align-items:center;">
+              <button class="btn" @click="confirmPaste()" :disabled="!pasteColStatus().every(c=>c.found)">
+                Analyze this data →
+              </button>
+              <span x-show="!pasteColStatus().every(c=>c.found)" style="font-size:12px; color:#b91c1c;">
+                Missing required columns — check your data
+              </span>
+            </div>
+
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Roster data view -->
+      <div x-show="roster.loaded">
+        <div class="file-bar">
+          <span><strong x-text="roster.fileName"></strong> &nbsp;·&nbsp; <span x-text="roster.data?.total_headcount?.toLocaleString()"></span> employees</span>
+          <button class="btn btn-outline" style="font-size:12px;padding:4px 10px;" @click="resetRoster()">↑ New file</button>
+        </div>
+
+        <!-- KPIs — Row 1: workforce size & cost -->
+        <div class="metrics">
+          <div class="metric">
+            <div class="metric-label">Total Headcount</div>
+            <div class="metric-value" x-text="roster.data?.total_headcount?.toLocaleString()"></div>
+            <div class="metric-sub">employees</div>
+          </div>
+          <div class="metric">
+            <div class="metric-label">Total Labor Spend</div>
+            <div class="metric-value" x-text="fmt(roster.data?.total_labor_spend)"></div>
+            <div class="metric-sub">fully loaded annual</div>
+          </div>
+          <div class="metric">
+            <div class="metric-label">Avg Cost / Employee</div>
+            <div class="metric-value" x-text="fmt(roster.data?.avg_cost_per_employee)"></div>
+            <div class="metric-sub">per year</div>
+          </div>
+          <div class="metric" :class="roster.data?.median_cost < roster.data?.avg_cost_per_employee * 0.7 ? 'accent' : ''">
+            <div class="metric-label">Median Cost / Employee</div>
+            <div class="metric-value" x-text="fmt(roster.data?.median_cost)"></div>
+            <div class="metric-sub" x-text="roster.data?.median_cost < roster.data?.avg_cost_per_employee * 0.7 ? '⚠ exec pay skew' : 'vs avg'"></div>
+          </div>
+        </div>
+
+        <!-- KPIs — Row 2: structure & concentration -->
+        <div class="metrics" style="margin-top:-4px;">
+          <div class="metric">
+            <div class="metric-label">Functions</div>
+            <div class="metric-value" x-text="Object.keys(roster.data?.by_function||{}).length"></div>
+            <div class="metric-sub">unique departments</div>
+          </div>
+          <div class="metric">
+            <div class="metric-label">Countries</div>
+            <div class="metric-value" x-text="roster.data?.num_countries"></div>
+            <div class="metric-sub">geographic footprint</div>
+          </div>
+          <div class="metric" :class="roster.data?.senior_ratio > 25 ? 'accent' : ''">
+            <div class="metric-label">Senior Ratio</div>
+            <div class="metric-value" x-text="(roster.data?.senior_ratio || 0) + '%'"></div>
+            <div class="metric-sub" x-text="(roster.data?.senior_count || 0) + ' VP / Director level'"></div>
+          </div>
+          <div class="metric" :class="roster.data?.cost_concentration > 60 ? 'accent' : ''">
+            <div class="metric-label">Cost Concentration</div>
+            <div class="metric-value" x-text="(roster.data?.cost_concentration || 0) + '%'"></div>
+            <div class="metric-sub">top 25% earners' share of spend</div>
+          </div>
+        </div>
+
+        <!-- Charts row 1 -->
+        <div class="charts-grid">
+          <div class="card">
+            <div class="card-title">Headcount by Function</div>
+            <canvas id="fnChart"></canvas>
+          </div>
+          <div class="card">
+            <div class="card-title">Seniority Distribution</div>
+            <canvas id="snChart"></canvas>
+          </div>
+        </div>
+
+        <!-- Cost by function -->
+        <div class="card">
+          <div class="card-title">Labor Spend by Function</div>
+          <canvas id="costFnChart" height="100"></canvas>
+        </div>
+
+        <!-- Country table -->
+        <div class="card">
+          <div class="card-title">Geographic Breakdown (Top 10)</div>
+          <table class="data-table">
+            <thead><tr><th>Country</th><th>Headcount</th><th>% Total</th><th>Labor Spend</th><th></th></tr></thead>
+            <tbody>
+              <template x-for="row in countryRows()" :key="row.country">
+                <tr>
+                  <td x-text="row.country"></td>
+                  <td x-text="row.count.toLocaleString()"></td>
+                  <td x-text="row.pct + '%'"></td>
+                  <td x-text="fmt(row.cost)"></td>
+                  <td><div class="progress-bar"><div class="progress-fill" :style="`width:${row.pct}%`"></div></div></td>
+                </tr>
+              </template>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- AI Narrative — Roster -->
+        <div class="ai-card">
+          <div class="ai-card-header">
+            <div class="ai-card-title">🤖 Analyst Narrative</div>
+            <button class="btn" style="font-size:11px;padding:5px 12px;" @click="generateNarrative('roster')" :disabled="ai.roster.loading">
+              <span x-show="!ai.roster.text && !ai.roster.loading">Generate Narrative</span>
+              <span x-show="ai.roster.loading"><span class="spinner"></span>Analyzing…</span>
+              <span x-show="ai.roster.text && !ai.roster.loading">Regenerate</span>
+            </button>
+          </div>
+          <div x-show="!ai.roster.text && !ai.roster.loading" class="ai-placeholder">Click "Generate Narrative" to get a practitioner-ready summary of what this roster is telling you.</div>
+          <div x-show="ai.roster.text" class="ai-narrative-text" x-text="ai.roster.text"></div>
+          <div x-show="ai.roster.text" class="q-chips">
+            <template x-for="q in rosterQuestions" :key="q">
+              <button class="q-chip" @click="askQuestion('roster', q)" x-text="q"></button>
+            </template>
+          </div>
+          <div x-show="ai.roster.chat.length > 0" class="chat-msgs">
+            <template x-for="(msg, i) in ai.roster.chat" :key="i">
+              <div class="chat-bubble" :class="msg.role==='user' ? 'q' : 'a'" x-text="msg.text"></div>
+            </template>
+          </div>
+        </div>
+
+        <!-- Step 1 nav -->
+        <div class="step-nav">
+          <span></span>
+          <button class="btn" @click="goStep(2)">Continue: Financial Data →</button>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ===== STEP 2: FINANCIALS ===== -->
+    <div x-show="step === 2">
+
+      <div class="card">
+        <div class="card-title">Financial Data — 10-K</div>
+
+        <!-- Mode toggle -->
+        <div class="mode-toggle">
+          <button class="mode-btn" :class="{active: financials.mode==='auto'}" @click="financials.mode='auto'">Auto (SEC EDGAR)</button>
+          <button class="mode-btn" :class="{active: financials.mode==='manual'}" @click="financials.mode='manual'">Enter manually</button>
+        </div>
+
+        <!-- Auto mode: SEC EDGAR fetch -->
+        <div x-show="financials.mode === 'auto'">
+          <div class="input-group">
+            <input class="form-control" type="text" placeholder="AAPL" style="width:130px;"
+                   x-model="financials.ticker"
+                   @keyup.enter="fetchFinancials()"
+                   :disabled="financials.loading">
+            <button class="btn" @click="fetchFinancials()" :disabled="financials.loading || !financials.ticker.trim()">
+              <span class="spinner" x-show="financials.loading"></span>
+              <span x-text="financials.loading ? 'Fetching…' : 'Fetch from SEC EDGAR'"></span>
+            </button>
+            <button x-show="financials.loaded && financials.mode==='auto'" class="btn btn-outline" @click="resetFinancials()">Clear</button>
+          </div>
+          <div style="font-size:11px;color:#aaa;">Pulls the latest 10-K filing. May take 10–20s for large companies.</div>
+          <p style="margin-top:8px;margin-bottom:0;">
+            <button class="btn-link" @click="loadDemoFinancials()">Use demo financial data instead</button>
+          </p>
+        </div>
+
+        <!-- Manual mode: paste from 10-K -->
+        <div x-show="financials.mode === 'manual'">
+          <div style="font-size:12px;color:#555;margin-bottom:12px;background:#f9f9f9;padding:8px 10px;border-radius:4px;border-left:3px solid #dee2e6;">
+            Copy values directly from the 10-K filing and paste them here. Commas and $ signs are ignored automatically.
+          </div>
+          <div class="manual-grid" style="margin-bottom:12px;">
+            <div class="form-group" style="grid-column:1/3;">
+              <label class="form-label">Company Name</label>
+              <input class="form-input" type="text" placeholder="e.g. Apple Inc." x-model="financials.manual.company">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Fiscal Year</label>
+              <input class="form-input" type="text" placeholder="e.g. 2024" x-model="financials.manual.fiscal_year">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Total Revenue ($)</label>
+              <input class="form-input" type="text" placeholder="e.g. 391,035,000,000" x-model="financials.manual.total_revenue">
+              <span class="form-hint">Paste from document — formatting is stripped</span>
+            </div>
+            <div class="form-group">
+              <label class="form-label">EBITDA ($)</label>
+              <input class="form-input" type="text" placeholder="e.g. 130,000,000,000" x-model="financials.manual.ebitda">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Total Expenses ($)</label>
+              <input class="form-input" type="text" placeholder="e.g. 261,000,000,000" x-model="financials.manual.total_expenses">
+            </div>
+          </div>
+          <div style="font-size:11px;font-weight:700;color:#aaa;text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px;">Expense detail (optional)</div>
+          <div class="manual-grid" style="margin-bottom:14px;">
+            <div class="form-group">
+              <label class="form-label">Cost of Revenue ($)</label>
+              <input class="form-input" type="text" placeholder="optional" x-model="financials.manual.cost_of_revenue">
+            </div>
+            <div class="form-group">
+              <label class="form-label">R&D ($)</label>
+              <input class="form-input" type="text" placeholder="optional" x-model="financials.manual.rd">
+            </div>
+            <div class="form-group">
+              <label class="form-label">SG&A ($)</label>
+              <input class="form-input" type="text" placeholder="optional" x-model="financials.manual.sga">
+            </div>
+          </div>
+          <div style="display:flex;gap:8px;">
+            <button class="btn" @click="loadManual()" :disabled="!financials.manual.company || !financials.manual.total_revenue">Save &amp; Apply</button>
+            <button x-show="financials.loaded && financials.mode==='manual'" class="btn btn-outline" @click="resetFinancials()">Clear</button>
+          </div>
+        </div>
+      </div>
+
+      <div x-show="financials.error" class="alert alert-danger" x-text="financials.error"></div>
+
+      <div x-show="financials.loaded && financials.data">
+
+        <div class="card">
+          <div class="company-header">
+            <div>
+              <div class="company-ticker" x-text="financials.data?.ticker"></div>
+              <div class="company-name" x-text="financials.data?.company"></div>
+            </div>
+            <div style="font-size:13px;color:#555;border-left:2px solid #eee;padding-left:14px;">
+              FY <strong x-text="financials.data?.fiscal_year || '—'"></strong>
+              <div style="font-size:11px;color:#aaa;margin-top:2px;">Filed: <span x-text="financials.data?.filing_date || 'N/A'"></span></div>
+            </div>
+            <div style="margin-left:auto;display:flex;align-items:center;gap:10px;">
+              <span class="source-pill" x-text="financials.data?.source || 'SEC EDGAR 10-K'"></span>
+              <button class="btn" style="font-size:11px;padding:5px 12px;" @click="exportToPDF()">↓ Export PDF</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="metrics">
+          <div class="metric">
+            <div class="metric-label">Total Revenue</div>
+            <div class="metric-value" x-text="fmt(financials.data?.total_revenue)"></div>
+            <div class="metric-sub">annual</div>
+          </div>
+          <div class="metric">
+            <div class="metric-label">EBITDA (est.)</div>
+            <div class="metric-value" x-text="fmt(financials.data?.ebitda)"></div>
+            <div class="metric-sub">Op. Income + D&A</div>
+          </div>
+          <div class="metric">
+            <div class="metric-label">Operating Income</div>
+            <div class="metric-value" x-text="fmt(financials.data?.operating_income)"></div>
+          </div>
+          <div class="metric">
+            <div class="metric-label">D&A</div>
+            <div class="metric-value" x-text="fmt(financials.data?.depreciation_amortization)"></div>
+          </div>
+        </div>
+
+        <div class="card" x-show="financials.data?.expense_breakdown">
+          <div class="card-title">Expense Breakdown (% of Revenue)</div>
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:16px;">
+            <template x-for="[label, key] in [['Cost of Revenue','cost_of_revenue'],['R&D','research_and_development'],['SG&A','selling_general_admin']]" :key="key">
+              <div>
+                <div class="insight-label" x-text="label"></div>
+                <div class="insight-value" x-text="fmt(financials.data?.expense_breakdown?.[key])"></div>
+                <div class="progress-bar" style="width:100%;margin-top:6px;">
+                  <div class="progress-fill" :style="`width:${pct(financials.data?.expense_breakdown?.[key], financials.data?.total_revenue)}%`"></div>
+                </div>
+                <div class="insight-sub" x-text="pct(financials.data?.expense_breakdown?.[key], financials.data?.total_revenue) + '% of revenue'"></div>
+              </div>
+            </template>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Step 2 nav -->
+      <div class="step-nav">
+        <button class="btn btn-outline" @click="goStep(1)">← Roster Analysis</button>
+        <button class="btn" @click="goStep(3)" :disabled="!roster.loaded || !financials.loaded"
+                x-text="roster.loaded && financials.loaded ? 'Integrated Analysis →' : 'Load roster first'"></button>
+      </div>
+
+    </div>
+
+    <!-- ===== STEP 3: INTEGRATED ===== -->
+    <div x-show="step === 3">
+
+      <!-- Empty state -->
+      <div x-show="!roster.loaded || !financials.loaded">
+        <div class="empty-state">
+          <div class="empty-icon">🔗</div>
+          <div class="empty-title">Load both datasets to unlock Integrated Analysis</div>
+          <div class="empty-sub">Cross-analysis of workforce composition vs. financial performance</div>
+          <div class="checklist">
+            <div class="check-item" :class="roster.loaded ? 'done' : 'todo'">
+              <span x-text="roster.loaded ? '✓' : '○'"></span>
+              Roster Data <span x-show="!roster.loaded" style="font-size:11px;"> — go to Roster Analysis tab</span>
+            </div>
+            <div class="check-item" :class="financials.loaded ? 'done' : 'todo'">
+              <span x-text="financials.loaded ? '✓' : '○'"></span>
+              Financial Data <span x-show="!financials.loaded" style="font-size:11px;"> — go to Financial Data tab</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Integrated view -->
+      <div x-show="roster.loaded && financials.loaded">
+
+        <!-- Comparison banner -->
+        <div style="background:#fff;border-radius:8px;padding:16px 20px;margin-bottom:16px;box-shadow:0 1px 3px rgba(0,0,0,.08);display:flex;align-items:center;gap:0;border-left:4px solid #498E2B;">
+          <div style="flex:1;">
+            <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#aaa;margin-bottom:4px;">Roster</div>
+            <div style="font-size:15px;font-weight:700;color:#212529;" x-text="roster.fileName"></div>
+            <div style="font-size:12px;color:#6c757d;margin-top:2px;"><span x-text="roster.data?.total_headcount?.toLocaleString()"></span> employees · <span x-text="roster.data?.num_countries"></span> countries</div>
+          </div>
+          <div style="padding:0 24px;font-size:22px;color:#dee2e6;font-weight:300;">↔</div>
+          <div style="flex:1;">
+            <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#aaa;margin-bottom:4px;">Financials</div>
+            <div style="font-size:15px;font-weight:700;color:#212529;" x-text="financials.data?.company"></div>
+            <div style="font-size:12px;color:#6c757d;margin-top:2px;">FY<span x-text="financials.data?.fiscal_year"></span> · <span x-text="financials.data?.source"></span></div>
+          </div>
+          <div style="margin-left:auto;padding-left:24px;border-left:1px solid #f0f0f0;display:flex;flex-direction:column;align-items:flex-end;gap:8px;">
+            <div>
+              <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#aaa;margin-bottom:4px;">Revenue</div>
+              <div style="font-size:15px;font-weight:700;color:#498E2B;" x-text="fmt(financials.data?.total_revenue)"></div>
+              <div style="font-size:12px;color:#6c757d;margin-top:2px;">EBITDA <span x-text="ebitdaMargin()"></span></div>
+            </div>
+            <button @click="exportToPPT()" :disabled="pptExporting"
+              style="background:#d97706;color:#fff;border:none;border-radius:5px;padding:8px 16px;font-size:12px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px;box-shadow:0 2px 6px rgba(217,119,6,.35);transition:background .15s;"
+              onmouseover="this.style.background='#b45309'" onmouseout="this.style.background='#d97706'">
+              <span x-show="!pptExporting">📊 Export to PPT</span>
+              <span x-show="pptExporting"><span class="spinner" style="border-top-color:#fff;border-color:rgba(255,255,255,.3);border-top-color:#fff;"></span> Building…</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Ratio KPIs -->
+        <div class="metrics" style="grid-template-columns:repeat(3,1fr);">
+          <div class="metric-ratio">
+            <div class="metric-label">Revenue per Employee</div>
+            <div class="metric-value" x-text="fmt(revenuePerEmployee())"></div>
+            <div class="metric-sub" style="color:rgba(255,255,255,.7);" x-text="financials.data?.company + ' FY' + financials.data?.fiscal_year"></div>
+          </div>
+          <div class="metric accent">
+            <div class="metric-label">Labor as % of Revenue</div>
+            <div class="metric-value" x-text="laborPct()"></div>
+            <div class="metric-sub"><span x-text="fmt(roster.data?.total_labor_spend)"></span> labor / <span x-text="fmt(financials.data?.total_revenue)"></span> revenue</div>
+          </div>
+          <div class="metric">
+            <div class="metric-label">EBITDA Margin</div>
+            <div class="metric-value" x-text="ebitdaMargin()"></div>
+            <div class="metric-sub">ebitda / revenue</div>
+          </div>
+        </div>
+
+        <!-- Integrated charts -->
+        <div class="charts-grid">
+          <div class="card">
+            <div class="card-title">Seniority Pyramid</div>
+            <canvas id="pyramidChart"></canvas>
+          </div>
+          <div class="card">
+            <div class="card-title">Labor Spend by Seniority</div>
+            <canvas id="costSnChart"></canvas>
+          </div>
+        </div>
+
+        <!-- Insights -->
+        <div class="card">
+          <div class="card-title">Key Insights</div>
+          <div class="insights-grid">
+            <div>
+              <div class="insight-label">Top Function — Headcount</div>
+              <div class="insight-value" x-text="topFn()?.name || '—'"></div>
+              <div class="insight-sub" x-text="(topFn()?.count?.toLocaleString() || '') + ' employees (' + (topFn()?.pct || '') + '%)'"></div>
+            </div>
+            <div>
+              <div class="insight-label">Top Function — Spend</div>
+              <div class="insight-value" x-text="topFnSpend()?.name || '—'"></div>
+              <div class="insight-sub" x-text="fmt(topFnSpend()?.cost) + ' (' + (topFnSpend()?.pct || '') + '% of labor)'"></div>
+            </div>
+            <div>
+              <div class="insight-label">Largest Seniority Band</div>
+              <div class="insight-value" x-text="topSn()?.name || '—'"></div>
+              <div class="insight-sub" x-text="(topSn()?.count?.toLocaleString() || '') + ' employees (' + (topSn()?.pct || '') + '%)'"></div>
+            </div>
+            <div>
+              <div class="insight-label">Geographic Footprint</div>
+              <div class="insight-value" x-text="Object.keys(roster.data?.by_country || {}).length + ' countries'"></div>
+              <div class="insight-sub" x-text="'Largest: ' + topCountry()?.name + ' (' + topCountry()?.pct + '%)'"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Opportunities card -->
+        <div class="card">
+          <div class="card-title" style="color:#d97706;">⚡ Potential Value Creation Opportunities</div>
+          <div style="display:flex;flex-direction:column;gap:10px;">
+            <template x-for="opp in opportunities()" :key="opp.title">
+              <div style="display:flex;gap:14px;padding:12px 14px;border-radius:6px;background:#fffbf0;border:1px solid #fde68a;">
+                <div style="flex:0 0 auto;width:8px;height:8px;border-radius:50%;background:#d97706;margin-top:5px;"></div>
+                <div style="flex:1;">
+                  <div style="font-size:13px;font-weight:700;color:#92400e;" x-text="opp.title"></div>
+                  <div style="font-size:12px;color:#78350f;margin-top:3px;line-height:1.5;" x-text="opp.detail"></div>
+                  <div x-show="opp.impact" style="margin-top:5px;font-size:11px;font-weight:700;color:#d97706;background:#fef3c7;display:inline-block;padding:2px 8px;border-radius:10px;" x-text="opp.impact"></div>
+                </div>
+              </div>
+            </template>
+          </div>
+        </div>
+
+        <!-- AI Narrative — Integrated -->
+        <div class="ai-card">
+          <div class="ai-card-header">
+            <div class="ai-card-title">🤖 Analyst Narrative</div>
+            <button class="btn" style="font-size:11px;padding:5px 12px;" @click="generateNarrative('integrated')" :disabled="ai.integrated.loading">
+              <span x-show="!ai.integrated.text && !ai.integrated.loading">Generate Narrative</span>
+              <span x-show="ai.integrated.loading"><span class="spinner"></span>Analyzing…</span>
+              <span x-show="ai.integrated.text && !ai.integrated.loading">Regenerate</span>
+            </button>
+          </div>
+          <div x-show="!ai.integrated.text && !ai.integrated.loading" class="ai-placeholder">Click "Generate Narrative" to get a cross-dataset interpretation ready for your diligence report.</div>
+          <div x-show="ai.integrated.text" class="ai-narrative-text" x-text="ai.integrated.text"></div>
+          <div x-show="ai.integrated.text" class="q-chips">
+            <template x-for="q in integratedQuestions" :key="q">
+              <button class="q-chip" @click="askQuestion('integrated', q)" x-text="q"></button>
+            </template>
+          </div>
+          <div x-show="ai.integrated.chat.length > 0" class="chat-msgs">
+            <template x-for="(msg, i) in ai.integrated.chat" :key="i">
+              <div class="chat-bubble" :class="msg.role==='user' ? 'q' : 'a'" x-text="msg.text"></div>
+            </template>
+          </div>
+        </div>
+
+        <!-- Step 3 nav -->
+        <div class="step-nav">
+          <button class="btn btn-outline" @click="goStep(2)">← Financial Data</button>
+          <span></span>
+        </div>
+
+      </div>
+    </div>
+
+  </div><!-- /container -->
+
+  <!-- Period mismatch warning modal -->
+  <div class="modal-overlay" x-show="modal.show" x-cloak @click.self="modal.show=false">
+    <div class="modal-box">
+      <div class="modal-icon">⚠️</div>
+      <div class="modal-title">Check your data periods</div>
+      <div class="modal-body">
+        The Integrated Analysis cross-references your roster with
+        <strong>FY<span x-text="financials.data?.fiscal_year"></span></strong> financial data.
+        Make sure both sources cover the same period — combining a recent roster with an older 10-K can
+        skew revenue-per-employee and labor ratios significantly.
+        <template x-if="financials.data && financials.data.fiscal_year && (new Date().getFullYear() - parseInt(financials.data.fiscal_year)) > 1">
+          <div style="margin-top:10px;padding:8px 10px;background:#fff0f0;border-left:3px solid #e53e3e;border-radius:4px;color:#742a2a;font-weight:600;font-size:12px;">
+            FY<span x-text="financials.data?.fiscal_year"></span> is more than one year behind today. Flag this gap explicitly in your analysis output.
+          </div>
+        </template>
+      </div>
+      <div class="modal-footer">
+        <button class="btn" @click="modal.show=false">Understood, continue →</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+  const AP_COLORS = ['#498E2B','#5CB335','#7BC95A','#9DD970','#BEE89A','#C5EAB0','#3d7623','#2d5a1c'];
+  const SENIORITY_ORDER = ['executive','president','c-level','c level','vp','vice president','director','senior director','principal','senior manager','manager','senior','lead','staff','analyst','associate','specialist','coordinator','entry','junior','intern'];
+
+  const sortBySeniority = (entries) => entries.sort((a, b) => {
+    const rank = (s) => { const r = SENIORITY_ORDER.findIndex(r => s.toLowerCase().includes(r)); return r === -1 ? 99 : r; };
+    return rank(a[0]) - rank(b[0]);
+  });
+
+  function app() {
+    return {
+      step: 1,
+      charts: {},
+      pptExporting: false,
+      modal: { show: false, firstIntegrated: true },
+      roster: { loaded: false, data: null, fileName: null, dragging: false, mode: 'upload', paste: { raw: null, headers: null, preview: null } },
+      financials: { loaded: false, ticker: '', data: null, loading: false, error: null, mode: 'auto', manual: { company:'', fiscal_year:'', total_revenue:'', ebitda:'', total_expenses:'', cost_of_revenue:'', rd:'', sga:'' } },
+      ai: {
+        roster: { text: null, loading: false, chat: [] },
+        integrated: { text: null, loading: false, chat: [] },
+      },
+      rosterQuestions: [
+        'What does the seniority distribution tell us?',
+        'Is the labor spend concentrated or well-distributed?',
+        'Where is the geographic risk?',
+        'What function is most central to the business model?',
+        'Are there signs this org is a restructuring target?',
+      ],
+      integratedQuestions: [
+        'How does revenue per employee compare to benchmarks?',
+        'What does labor as % of revenue signal?',
+        'Where is the biggest cost optimization opportunity?',
+        'What does EBITDA margin imply for this workforce?',
+        'Is this org over- or under-invested in its top function?',
+      ],
+
+      goStep(n) {
+        if (n === 3 && (!this.roster.loaded || !this.financials.loaded)) return;
+        this.step = n;
+        if (n === 3 && this.modal.firstIntegrated) {
+          this.modal.show = true;
+          this.modal.firstIntegrated = false;
+        }
+        this.$nextTick(() => {
+          if (n === 1 && this.roster.loaded) this.renderRosterCharts();
+          if (n === 3 && this.roster.loaded && this.financials.loaded) this.renderIntegratedCharts();
+        });
+      },
+
+      // ---- FILE HANDLING ----
+      handleDrop(e) {
+        this.roster.dragging = false;
+        const f = e.dataTransfer.files[0];
+        if (f) this.parseExcel(f);
+      },
+      handleFile(e) {
+        const f = e.target.files[0];
+        if (f) this.parseExcel(f);
+      },
+      parseExcel(file) {
+        if (!file.name.match(/\.(xlsx|xls)$/i)) { alert('Please upload an Excel file.'); return; }
+        this.roster.fileName = file.name;
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          const wb = XLSX.read(e.target.result, { type: 'array' });
+          const rows = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]], { defval: '' });
+          this.processRoster(rows);
+        };
+        reader.readAsArrayBuffer(file);
+      },
+      processRoster(rows) {
+        if (!rows.length) { alert('No data found.'); return; }
+        const norm = (s) => String(s).trim().toLowerCase();
+        const headers = Object.keys(rows[0]).map(norm);
+        const find = (...kws) => { for (const kw of kws) { const h = headers.find(h => h.includes(kw)); if (h) return h; } return null; };
+
+        const fnCol   = find('job function','function','department','dept');
+        const snCol   = find('seniority','level','grade','seniority level');
+        const ctCol   = find('country','location','region');
+        const costCol = find('flc','fully loaded','fully-loaded','cost','salary','compensation','spend');
+
+        const normalized = rows.map(r => {
+          const nr = {}; Object.entries(r).forEach(([k,v]) => { nr[norm(k)] = v; });
+          return {
+            fn:   String(nr[fnCol]   || 'Unknown').trim() || 'Unknown',
+            sn:   String(nr[snCol]   || 'Unknown').trim() || 'Unknown',
+            ct:   String(nr[ctCol]   || 'Unknown').trim() || 'Unknown',
+            cost: parseFloat(String(nr[costCol] || '0').replace(/[^0-9.-]/g,'')) || 0,
+          };
+        });
+
+        const byFn={}, bySn={}, byCt={}, costByFn={}, costBySn={}, costByCt={};
+        let totalSpend = 0;
+        for (const { fn, sn, ct, cost } of normalized) {
+          byFn[fn]=(byFn[fn]||0)+1; bySn[sn]=(bySn[sn]||0)+1; byCt[ct]=(byCt[ct]||0)+1;
+          costByFn[fn]=(costByFn[fn]||0)+cost; costBySn[sn]=(costBySn[sn]||0)+cost; costByCt[ct]=(costByCt[ct]||0)+cost;
+          totalSpend += cost;
+        }
+        const total = normalized.length;
+
+        // Median cost
+        const sortedCosts = normalized.map(r => r.cost).sort((a,b) => a-b);
+        const mid = Math.floor(sortedCosts.length / 2);
+        const medianCost = sortedCosts.length % 2 === 0
+          ? (sortedCosts[mid-1] + sortedCosts[mid]) / 2
+          : sortedCosts[mid];
+
+        // Senior ratio: VP, Director, Executive, C-suite
+        const seniorKws = ['vp','vice president','director','executive','president','c-level','ceo','cto','cfo','coo','chief'];
+        const seniorCount = normalized.filter(r => seniorKws.some(kw => r.sn.toLowerCase().includes(kw))).length;
+        const seniorRatio = total ? Math.round(seniorCount / total * 100) : 0;
+
+        // Cost concentration: top 25% earners' share of total spend
+        const topN = Math.max(1, Math.ceil(total * 0.25));
+        const topCostSum = [...sortedCosts].reverse().slice(0, topN).reduce((s,v) => s+v, 0);
+        const costConcentration = totalSpend ? Math.round(topCostSum / totalSpend * 100) : 0;
+
+        this.roster.data = {
+          total_headcount: total, total_labor_spend: totalSpend,
+          avg_cost_per_employee: total ? totalSpend/total : 0,
+          median_cost: medianCost,
+          num_countries: Object.keys(byCt).length,
+          senior_count: seniorCount,
+          senior_ratio: seniorRatio,
+          cost_concentration: costConcentration,
+          by_function: byFn, by_seniority: bySn, by_country: byCt,
+          cost_by_function: costByFn, cost_by_seniority: costBySn, cost_by_country: costByCt,
+        };
+        this.roster.loaded = true;
+        this.$nextTick(() => {
+          this.renderRosterCharts();
+          if (this.step === 3 && this.financials.loaded) this.renderIntegratedCharts();
+        });
+      },
+      handlePasteData(e) {
+        e.preventDefault();
+        const text = (e.clipboardData || window.clipboardData).getData('text/plain');
+        if (!text.trim()) return;
+        const lines = text.trim().split('\n').map(r => r.split('\t').map(c => c.trim()));
+        if (lines.length < 2) return;
+        const headers = lines[0];
+        const rows = lines.slice(1).filter(r => r.some(c => c));
+        const data = rows.map(row => { const o = {}; headers.forEach((h,i) => { o[h] = row[i]||''; }); return o; });
+        this.roster.paste = { raw: data, headers, preview: data.slice(0,4) };
+      },
+
+      pasteColStatus() {
+        const headers = (this.roster.paste.headers || []).map(h => h.toLowerCase());
+        const required = [
+          { label: 'Job Function', kws: ['function','department','dept'] },
+          { label: 'Seniority',    kws: ['seniority','level','grade'] },
+          { label: 'Country',      kws: ['country','location','region'] },
+          { label: 'Fully Loaded Cost', kws: ['flc','fully loaded','cost','salary','compensation','spend'] },
+        ];
+        return required.map(r => ({ label: r.label, found: headers.some(h => r.kws.some(kw => h.includes(kw))) }));
+      },
+
+      confirmPaste() {
+        if (!this.roster.paste.raw) return;
+        this.roster.fileName = `Pasted data — ${this.roster.paste.raw.length} rows`;
+        this.processRoster(this.roster.paste.raw);
+      },
+
+      resetRoster() {
+        ['fnChart','snChart','costFnChart','pyramidChart','costSnChart'].forEach(id => this.destroyChart(id));
+        this.roster = { loaded: false, data: null, fileName: null, dragging: false, mode: 'upload', paste: { raw: null, headers: null, preview: null } };
+        this.ai.roster = { text: null, loading: false, chat: [] };
+      },
+
+      // ---- DEMO DATA ----
+      loadDemoRoster() {
+        this.roster.fileName = 'demo-roster.xlsx (synthetic)';
+        this.roster.data = {
+          total_headcount: 500, total_labor_spend: 52500000, avg_cost_per_employee: 105000,
+          median_cost: 82000, num_countries: 5, senior_count: 105, senior_ratio: 21, cost_concentration: 58,
+          by_function: { Engineering:180, Sales:95, Operations:80, Product:60, Marketing:45, Finance:25, HR:15 },
+          by_seniority: { 'VP / Director':35, 'Senior Manager':70, Manager:100, Senior:145, Analyst:100, Associate:50 },
+          by_country: { 'United States':230, India:120, 'United Kingdom':65, Germany:50, Brazil:35 },
+          cost_by_function: { Engineering:21000000, Sales:11400000, Operations:7600000, Product:6000000, Marketing:3600000, Finance:2100000, HR:800000 },
+          cost_by_seniority: { 'VP / Director':9100000, 'Senior Manager':11900000, Manager:14000000, Senior:12325000, Analyst:6000000, Associate:2500000 },
+          cost_by_country: { 'United States':29900000, India:8400000, 'United Kingdom':7475000, Germany:5250000, Brazil:1575000 },
+        };
+        this.roster.loaded = true;
+        this.$nextTick(() => {
+          this.renderRosterCharts();
+          if (this.step === 3 && this.financials.loaded) this.renderIntegratedCharts();
+        });
+      },
+      loadDemoFinancials() {
+        this.financials.data = {
+          company: 'Apple Inc.', ticker: 'AAPL', cik: '0000320193', fiscal_year: '2024',
+          total_revenue: 391035000000, ebitda: 134661000000,
+          operating_income: 123216000000, depreciation_amortization: 11445000000,
+          total_expenses: 267984000000,
+          expense_breakdown: { cost_of_revenue: 210352000000, research_and_development: 31370000000, selling_general_admin: 26097000000 },
+          source: 'Demo Data (Apple FY2024)', filing_date: '2024-11-01',
+        };
+        this.financials.ticker = 'AAPL';
+        this.financials.loaded = true;
+        if (this.step === 3 && this.roster.loaded) this.$nextTick(() => this.renderIntegratedCharts());
+      },
+
+      // ---- FINANCIALS ----
+      async fetchFinancials() {
+        if (!this.financials.ticker.trim()) return;
+        this.financials.loading = true; this.financials.error = null; this.financials.loaded = false;
+        const ticker = this.financials.ticker.toUpperCase().trim();
+        try {
+          const tickersResp = await fetch('https://data.sec.gov/files/company_tickers.json');
+          if (!tickersResp.ok) throw new Error('SEC EDGAR unavailable. Try again or use demo data.');
+          const tickersData = await tickersResp.json();
+          let cik = null, name = null;
+          for (const e of Object.values(tickersData)) {
+            if ((e.ticker||'').toUpperCase() === ticker) { cik = String(e.cik_str).padStart(10,'0'); name = e.title||ticker; break; }
+          }
+          if (!cik) throw new Error(`Ticker '${ticker}' not found. Try a public US company (e.g. AAPL, MSFT).`);
+
+          const factsResp = await fetch(`https://data.sec.gov/api/xbrl/companyfacts/CIK${cik}.json`);
+          if (!factsResp.ok) throw new Error('Could not load SEC EDGAR company facts.');
+          const facts = await factsResp.json();
+          this.financials.data = this.parseFinancials(facts, ticker, cik, name);
+          this.financials.loaded = true;
+          if (this.step === 3 && this.roster.loaded) this.$nextTick(() => this.renderIntegratedCharts());
+        } catch(e) {
+          this.financials.error = e.message;
+        } finally {
+          this.financials.loading = false;
+        }
+      },
+      parseFinancials(facts, ticker, cik, company) {
+        const gaap = facts?.facts?.['us-gaap'] || {};
+        const latest = (...keys) => {
+          for (const key of keys) {
+            const usd = gaap[key]?.units?.USD || [];
+            const annual = usd.filter(e => e.form==='10-K' && e.fp==='FY');
+            if (annual.length) return annual.sort((a,b) => b.end.localeCompare(a.end))[0];
+          }
+          return null;
+        };
+        const rev = latest('Revenues','RevenueFromContractWithCustomerExcludingAssessedTax','SalesRevenueNet');
+        const oi  = latest('OperatingIncomeLoss');
+        const da  = latest('DepreciationDepletionAndAmortization','DepreciationAndAmortization');
+        const v = e => e ? e.val : null;
+        return {
+          company, ticker, cik,
+          fiscal_year: rev?.end?.slice(0,4) || null,
+          total_revenue: v(rev),
+          ebitda: (v(oi)!==null && v(da)!==null) ? v(oi)+v(da) : null,
+          operating_income: v(oi),
+          depreciation_amortization: v(da),
+          total_expenses: v(latest('OperatingExpenses','CostsAndExpenses')),
+          expense_breakdown: {
+            cost_of_revenue: v(latest('CostOfRevenue','CostOfGoodsSold')),
+            research_and_development: v(latest('ResearchAndDevelopmentExpense')),
+            selling_general_admin: v(latest('SellingGeneralAndAdministrativeExpense')),
+          },
+          source: 'SEC EDGAR 10-K', filing_date: rev?.filed || null,
+        };
+      },
+      async exportToPPT() {
+        if (!this.roster.data || !this.financials.data) return;
+        this.pptExporting = true;
+        await this.$nextTick();
+        const rd = this.roster.data, fd = this.financials.data;
+        const fmt = this.fmt.bind(this);
+        const topFn = this.topFn(), topFnSpend = this.topFnSpend();
+        const topSn = this.topSn(), topCo = this.topCountry();
+        const opps = this.opportunities();
+        const laborPctVal = (() => {
+          if (!rd.total_labor_spend || !fd.total_revenue) return 'N/A';
+          const p = rd.total_labor_spend / fd.total_revenue * 100;
+          return p >= 1 ? Math.round(p)+'%' : p >= 0.1 ? p.toFixed(1)+'%' : p.toFixed(2)+'%';
+        })();
+        const ebitdaM = fd.ebitda && fd.total_revenue ? Math.round(fd.ebitda/fd.total_revenue*100)+'%' : 'N/A';
+
+        try {
+          const pptx = new PptxGenJS();
+          pptx.layout = 'LAYOUT_WIDE';
+          const G='498E2B', LG='5CB335', DK='222222', GR='6c757d', AM='d97706', WH='FFFFFF';
+
+          const addSlide = (title, sub) => {
+            const s = pptx.addSlide();
+            s.background = { color: 'f7f7f7' };
+            s.addShape(pptx.ShapeType.rect, { x:0, y:0, w:13.33, h:0.07, fill:{color:G} });
+            s.addShape(pptx.ShapeType.rect, { x:0, y:0.07, w:13.33, h:0.52, fill:{color:DK} });
+            s.addText('● AlixPartners', { x:0.3, y:0.07, w:4, h:0.52, color:WH, fontSize:11, bold:true, valign:'middle' });
+            s.addText('Outside-In Diligence Tool', { x:4, y:0.07, w:9.0, h:0.52, color:'aaaaaa', fontSize:10, valign:'middle', align:'right' });
+            if (title) s.addText(title, { x:0.4, y:0.72, w:12.5, h:0.48, color:DK, fontSize:18, bold:true });
+            if (sub) s.addText(sub, { x:0.4, y:1.18, w:12.5, h:0.3, color:GR, fontSize:10 });
+            s.addShape(pptx.ShapeType.rect, { x:0, y:7.28, w:13.33, h:0.22, fill:{color:'e8e8e8'} });
+            s.addText('Confidential — AlixPartners · Generated '+new Date().toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'}), { x:0.3, y:7.29, w:13, h:0.2, color:GR, fontSize:8, valign:'middle' });
+            return s;
+          };
+
+          // SLIDE 1 — Cover
+          const s1 = pptx.addSlide();
+          s1.background = { color: DK };
+          s1.addShape(pptx.ShapeType.rect, { x:0, y:0, w:0.14, h:7.5, fill:{color:G} });
+          s1.addText('● AlixPartners', { x:0.5, y:0.55, w:12, h:0.5, color:LG, fontSize:14, bold:true });
+          s1.addText('Outside-In\nDiligence Tool', { x:0.5, y:1.3, w:12, h:2.1, color:WH, fontSize:44, bold:true });
+          s1.addText(fd.company, { x:0.5, y:3.55, w:12, h:0.65, color:LG, fontSize:26, bold:true });
+          s1.addText('FY'+fd.fiscal_year+' · '+rd.total_headcount.toLocaleString()+' employees analyzed', { x:0.5, y:4.3, w:12, h:0.4, color:'aaaaaa', fontSize:13 });
+          s1.addShape(pptx.ShapeType.rect, { x:0.5, y:4.95, w:2.5, h:0.04, fill:{color:G} });
+          s1.addText('Prepared: '+new Date().toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'}), { x:0.5, y:5.15, w:12, h:0.3, color:'888888', fontSize:11 });
+          s1.addText('CONFIDENTIAL', { x:0.5, y:7.05, w:12, h:0.28, color:'666666', fontSize:9, bold:true, charSpacing:3 });
+
+          // SLIDE 2 — Dataset Overview
+          const s2 = addSlide('Dataset Overview', rd.total_headcount.toLocaleString()+'-person roster × '+fd.company+' FY'+fd.fiscal_year+' 10-K');
+          s2.addShape(pptx.ShapeType.rect, { x:0.4, y:1.6, w:5.8, h:5.0, fill:{color:WH}, line:{color:'dddddd',width:1} });
+          s2.addShape(pptx.ShapeType.rect, { x:0.4, y:1.6, w:5.8, h:0.48, fill:{color:G} });
+          s2.addText('ROSTER', { x:0.5, y:1.6, w:5.6, h:0.48, color:WH, fontSize:11, bold:true, valign:'middle' });
+          [['Source', rd.fileName||'Uploaded file'],['Employees',rd.total_headcount.toLocaleString()],['Countries',String(rd.num_countries)],['Total Labor Spend',fmt(rd.total_labor_spend)],['Avg Cost / Employee',fmt(rd.avg_cost_per_employee)],['Median Cost',fmt(rd.median_cost)],['Senior Ratio (VP+)',rd.senior_ratio+'%'],['Cost Concentration',rd.cost_concentration+'% (top quartile)']].forEach(([l,v],i) => {
+            s2.addText(l, { x:0.6, y:2.2+i*0.52, w:2.8, h:0.44, color:GR, fontSize:9.5 });
+            s2.addText(v, { x:3.4, y:2.2+i*0.52, w:2.6, h:0.44, color:DK, fontSize:9.5, bold:true, align:'right' });
+          });
+          s2.addText('↔', { x:6.3, y:3.9, w:0.7, h:0.6, color:'cccccc', fontSize:22, align:'center' });
+          s2.addShape(pptx.ShapeType.rect, { x:7.1, y:1.6, w:5.8, h:5.0, fill:{color:WH}, line:{color:'dddddd',width:1} });
+          s2.addShape(pptx.ShapeType.rect, { x:7.1, y:1.6, w:5.8, h:0.48, fill:{color:DK} });
+          s2.addText('FINANCIALS', { x:7.2, y:1.6, w:5.6, h:0.48, color:WH, fontSize:11, bold:true, valign:'middle' });
+          [['Company',fd.company],['Fiscal Year','FY'+fd.fiscal_year],['Source',fd.source||'SEC EDGAR 10-K'],['Total Revenue',fmt(fd.total_revenue)],['EBITDA',fmt(fd.ebitda)],['EBITDA Margin',ebitdaM],['Operating Income',fmt(fd.operating_income)],['D&A',fmt(fd.depreciation_amortization)]].forEach(([l,v],i) => {
+            s2.addText(l, { x:7.3, y:2.2+i*0.52, w:2.8, h:0.44, color:GR, fontSize:9.5 });
+            s2.addText(v||'N/A', { x:10.1, y:2.2+i*0.52, w:2.6, h:0.44, color:DK, fontSize:9.5, bold:true, align:'right' });
+          });
+
+          // SLIDE 3 — Integrated KPIs
+          const s3 = addSlide('Integrated Key Metrics', fd.company+' FY'+fd.fiscal_year+' · '+rd.total_headcount.toLocaleString()+' employees');
+          [{label:'REVENUE PER EMPLOYEE',val:fmt(this.revenuePerEmployee()),sub:fd.company+' FY'+fd.fiscal_year,bg:G,tc:WH,sc:'aaaaaa',ac:LG},
+           {label:'LABOR AS % OF REVENUE',val:laborPctVal,sub:fmt(rd.total_labor_spend)+' labor / '+fmt(fd.total_revenue)+' revenue',bg:WH,tc:DK,sc:GR,ac:'e67e22'},
+           {label:'EBITDA MARGIN',val:ebitdaM,sub:fmt(fd.ebitda)+' / '+fmt(fd.total_revenue),bg:WH,tc:DK,sc:GR,ac:G}].forEach((k,i) => {
+            const x = 0.4+i*4.3;
+            s3.addShape(pptx.ShapeType.rect, { x, y:1.6, w:4.0, h:3.8, fill:{color:k.bg}, line:{color:'dddddd',width:1} });
+            s3.addShape(pptx.ShapeType.rect, { x, y:1.6, w:0.07, h:3.8, fill:{color:k.ac} });
+            s3.addText(k.label, { x:x+0.2, y:1.72, w:3.7, h:0.48, color:i===0?'rgba(255,255,255,0.7)':GR, fontSize:9, bold:true });
+            s3.addText(k.val, { x:x+0.2, y:2.3, w:3.7, h:1.6, color:k.tc, fontSize:32, bold:true, valign:'middle' });
+            s3.addText(k.sub, { x:x+0.2, y:4.85, w:3.7, h:0.42, color:k.sc, fontSize:8.5 });
+          });
+
+          // SLIDE 4 — Workforce Composition
+          const s4 = addSlide('Workforce Composition', rd.total_headcount.toLocaleString()+' employees · '+rd.num_countries+' countries · '+rd.senior_ratio+'% VP+ level');
+          s4.addShape(pptx.ShapeType.rect, { x:0.4, y:1.58, w:5.9, h:5.1, fill:{color:WH}, line:{color:'dddddd',width:1} });
+          s4.addText('HEADCOUNT BY FUNCTION', { x:0.6, y:1.68, w:5.5, h:0.38, color:GR, fontSize:9, bold:true });
+          Object.entries(rd.by_function).sort((a,b)=>b[1]-a[1]).slice(0,7).forEach(([fn,cnt],i) => {
+            const bw = Math.max(0.08,(cnt/rd.total_headcount)*3.8);
+            s4.addText(fn, { x:0.6, y:2.2+i*0.56, w:1.9, h:0.38, color:DK, fontSize:9.5 });
+            s4.addShape(pptx.ShapeType.rect, { x:2.6, y:2.28+i*0.56, w:bw, h:0.2, fill:{color:i===0?G:LG} });
+            s4.addText(cnt.toLocaleString()+' ('+Math.round(cnt/rd.total_headcount*100)+'%)', { x:2.7+bw, y:2.2+i*0.56, w:3.4, h:0.38, color:GR, fontSize:9 });
+          });
+          const snS = sortBySeniority(Object.entries(rd.by_seniority));
+          s4.addShape(pptx.ShapeType.rect, { x:6.7, y:1.58, w:6.2, h:5.1, fill:{color:WH}, line:{color:'dddddd',width:1} });
+          s4.addText('SENIORITY DISTRIBUTION', { x:6.9, y:1.68, w:5.8, h:0.38, color:GR, fontSize:9, bold:true });
+          snS.slice(0,8).forEach(([sn,cnt],i) => {
+            const bw = Math.max(0.08,(cnt/rd.total_headcount)*3.8);
+            const op = Math.max(20,Math.min(100,40+i*8));
+            s4.addText(sn, { x:6.9, y:2.2+i*0.54, w:1.9, h:0.38, color:DK, fontSize:9 });
+            s4.addShape(pptx.ShapeType.rect, { x:8.9, y:2.28+i*0.54, w:bw, h:0.2, fill:{color:G, transparency:100-op} });
+            s4.addText(cnt.toLocaleString()+' ('+Math.round(cnt/rd.total_headcount*100)+'%)', { x:9+bw, y:2.2+i*0.54, w:3.8, h:0.38, color:GR, fontSize:9 });
+          });
+
+          // SLIDE 5 — Value Creation Opportunities
+          const s5 = addSlide('Value Creation Opportunities', 'Data-driven levers identified from roster and financial cross-analysis');
+          s5.addShape(pptx.ShapeType.rect, { x:0.4, y:1.54, w:12.5, h:0.05, fill:{color:AM} });
+          opps.slice(0,5).forEach((opp,i) => {
+            const y = 1.68+i*1.08;
+            s5.addShape(pptx.ShapeType.rect, { x:0.4, y, w:12.5, h:0.98, fill:{color:'fffbf0'}, line:{color:'fde68a',width:1} });
+            s5.addShape(pptx.ShapeType.rect, { x:0.4, y, w:0.06, h:0.98, fill:{color:AM} });
+            s5.addText(opp.title, { x:0.6, y:y+0.06, w:opp.impact?8.5:11.8, h:0.34, color:'92400e', fontSize:10, bold:true });
+            if (opp.impact) s5.addText(opp.impact, { x:9.2, y:y+0.06, w:3.5, h:0.34, color:AM, fontSize:9, bold:true, align:'right' });
+            s5.addText((opp.detail||'').substring(0,200)+((opp.detail||'').length>200?'…':''), { x:0.6, y:y+0.44, w:12.1, h:0.46, color:'78350f', fontSize:8.5 });
+          });
+
+          // SLIDE 6 — Key Insights
+          const s6 = addSlide('Key Insights', 'Summary findings from the integrated workforce + financial analysis');
+          [{label:'TOP FUNCTION — HEADCOUNT',val:topFn?.name||'—',sub:(topFn?.count?.toLocaleString()||'')+' employees ('+topFn?.pct+'%)'},
+           {label:'TOP FUNCTION — SPEND',val:topFnSpend?.name||'—',sub:fmt(topFnSpend?.cost)+' ('+Math.round((topFnSpend?.cost||0)/rd.total_labor_spend*100)+'% of labor)'},
+           {label:'LARGEST SENIORITY BAND',val:topSn?.name||'—',sub:(topSn?.count?.toLocaleString()||'')+' employees ('+topSn?.pct+'%)'},
+           {label:'GEOGRAPHIC FOOTPRINT',val:rd.num_countries+' countries',sub:'Largest: '+(topCo?.name||'—')+' ('+topCo?.pct+'%)'}].forEach((ins,i) => {
+            const x=0.4+(i%2)*6.5, y=1.7+Math.floor(i/2)*2.7;
+            s6.addShape(pptx.ShapeType.rect, { x, y, w:6.0, h:2.4, fill:{color:WH}, line:{color:'dddddd',width:1} });
+            s6.addShape(pptx.ShapeType.rect, { x, y, w:0.06, h:2.4, fill:{color:G} });
+            s6.addText(ins.label, { x:x+0.2, y:y+0.14, w:5.6, h:0.38, color:GR, fontSize:9, bold:true });
+            s6.addText(ins.val, { x:x+0.2, y:y+0.56, w:5.6, h:1.1, color:DK, fontSize:22, bold:true, valign:'middle' });
+            s6.addText(ins.sub, { x:x+0.2, y:y+1.9, w:5.6, h:0.38, color:GR, fontSize:9 });
+          });
+
+          await pptx.writeFile({ fileName: 'OIDD-'+fd.company.replace(/[^a-z0-9]/gi,'_')+'-FY'+fd.fiscal_year+'.pptx' });
+        } finally {
+          this.pptExporting = false;
+        }
+      },
+
+      exportToPDF() {
+        const d = this.financials.data;
+        if (!d) return;
+        const fmt = this.fmt.bind(this);
+        const pct = this.pct.bind(this);
+
+        const metricCard = (label, value, sub) => `
+          <div class="metric">
+            <div class="metric-label">${label}</div>
+            <div class="metric-value">${fmt(value)}</div>
+            ${sub ? `<div class="metric-sub">${sub}</div>` : ''}
+          </div>`;
+
+        const expRow = (label, val, total) => {
+          if (!val) return '';
+          const p = pct(val, total);
+          return `<tr>
+            <td>${label}</td>
+            <td style="text-align:right;font-weight:600;">${fmt(val)}</td>
+            <td style="text-align:right;color:#666;">${p}%</td>
+            <td style="width:120px;padding-left:10px;"><div style="height:5px;background:#e0e0e0;border-radius:2px;"><div style="height:5px;width:${p}%;background:#5CB335;border-radius:2px;"></div></div></td>
+          </tr>`;
+        };
+
+        const eb = d.expense_breakdown || {};
+        const hasExpenses = d.total_expenses || eb.cost_of_revenue || eb.research_and_development || eb.selling_general_admin;
+
+        const html = `<!DOCTYPE html>
+<html><head><meta charset="UTF-8">
+<title>${d.company} — Financial Report</title>
+<style>
+  *{box-sizing:border-box;} body{font-family:Arial,Helvetica,sans-serif;font-size:11pt;color:#111;margin:0;padding:0;}
+  .header{background:#222;padding:16px 32px 12px;border-bottom:4px solid #498E2B;}
+  .header-brand{color:#5CB335;font-size:11pt;font-weight:700;margin-bottom:2px;}
+  .header-sub{color:#aaa;font-size:9pt;}
+  .content{padding:24px 32px;}
+  .company-block{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:20px;padding-bottom:16px;border-bottom:2px solid #eee;}
+  .ticker{font-size:24pt;font-weight:800;color:#111;}
+  .co-name{font-size:11pt;color:#666;margin-top:2px;}
+  .source-pill{background:#e8f5e9;color:#166534;font-size:9pt;font-weight:700;padding:3px 9px;border-radius:10px;display:inline-block;margin-top:6px;}
+  .section-title{font-size:8pt;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#888;margin:20px 0 10px;padding-bottom:5px;border-bottom:1px solid #eee;}
+  .metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:4px;}
+  .metric{background:#f9f9f9;border-left:3px solid #498E2B;padding:12px 14px;border-radius:4px;}
+  .metric-label{font-size:7.5pt;text-transform:uppercase;letter-spacing:.05em;color:#888;font-weight:700;margin-bottom:4px;}
+  .metric-value{font-size:15pt;font-weight:800;color:#111;}
+  .metric-sub{font-size:8pt;color:#aaa;margin-top:2px;}
+  table{width:100%;border-collapse:collapse;font-size:10pt;}
+  thead th{text-align:left;padding:7px 10px;background:#f4f4f4;border-bottom:2px solid #ddd;font-size:8pt;text-transform:uppercase;letter-spacing:.05em;color:#666;}
+  tbody td{padding:8px 10px;border-bottom:1px solid #f0f0f0;vertical-align:middle;}
+  .footer{margin-top:32px;padding-top:10px;border-top:1px solid #eee;font-size:8pt;color:#aaa;display:flex;justify-content:space-between;}
+  @media print{body{-webkit-print-color-adjust:exact;print-color-adjust:exact;}}
+</style>
+</head>
+<body>
+<div class="header">
+  <div class="header-brand">● AlixPartners</div>
+  <div class="header-sub">Outside-In Diligence — Financial Summary</div>
+</div>
+<div class="content">
+  <div class="company-block">
+    <div>
+      <div class="ticker">${d.ticker}</div>
+      <div class="co-name">${d.company}</div>
+    </div>
+    <div style="text-align:right;">
+      <div style="font-size:13pt;font-weight:700;">FY ${d.fiscal_year || '—'}</div>
+      <div style="font-size:9pt;color:#888;margin-top:2px;">Filed: ${d.filing_date || 'N/A'}</div>
+      <span class="source-pill">${d.source || 'SEC EDGAR 10-K'}</span>
+    </div>
+  </div>
+
+  <div class="section-title">Key Financial Metrics</div>
+  <div class="metrics">
+    ${metricCard('Total Revenue', d.total_revenue, 'annual')}
+    ${metricCard('EBITDA (est.)', d.ebitda, 'Op. Income + D&A')}
+    ${metricCard('Operating Income', d.operating_income)}
+    ${metricCard('Depreciation & Amortization', d.depreciation_amortization)}
+  </div>
+
+  ${hasExpenses ? `
+  <div class="section-title">Expense Breakdown</div>
+  <table>
+    <thead><tr><th>Category</th><th style="text-align:right;">Amount</th><th style="text-align:right;">% of Revenue</th><th></th></tr></thead>
+    <tbody>
+      ${d.total_expenses ? `<tr style="font-weight:700;background:#f9f9f9;"><td>Total Expenses</td><td style="text-align:right;">${fmt(d.total_expenses)}</td><td style="text-align:right;color:#666;">${pct(d.total_expenses, d.total_revenue)}%</td><td></td></tr>` : ''}
+      ${expRow('Cost of Revenue', eb.cost_of_revenue, d.total_revenue)}
+      ${expRow('Research & Development', eb.research_and_development, d.total_revenue)}
+      ${expRow('Selling, General & Admin (SG&A)', eb.selling_general_admin, d.total_revenue)}
+    </tbody>
+  </table>` : ''}
+
+  <div class="footer">
+    <span>Source: ${d.source || 'SEC EDGAR 10-K'}${d.filing_date ? ' · Filed ' + d.filing_date : ''}</span>
+    <span>Generated ${new Date().toLocaleDateString('en-US',{year:'numeric',month:'long',day:'numeric'})}</span>
+  </div>
+</div>
+<script>window.onload=function(){window.print();}<\/script>
+</body></html>`;
+
+        const w = window.open('', '_blank', 'width=900,height=700');
+        w.document.write(html);
+        w.document.close();
+      },
+
+      loadManual() {
+        const parse = (v) => { const s = String(v).replace(/[^0-9.-]/g,''); return s ? parseFloat(s) : null; };
+        const m = this.financials.manual;
+        this.financials.data = {
+          company: m.company || 'Company',
+          ticker: '—',
+          cik: null,
+          fiscal_year: m.fiscal_year || '—',
+          total_revenue: parse(m.total_revenue),
+          ebitda: parse(m.ebitda),
+          operating_income: null,
+          depreciation_amortization: null,
+          total_expenses: parse(m.total_expenses),
+          expense_breakdown: {
+            cost_of_revenue: parse(m.cost_of_revenue),
+            research_and_development: parse(m.rd),
+            selling_general_admin: parse(m.sga),
+          },
+          source: 'Manual Entry',
+          filing_date: null,
+        };
+        this.financials.loaded = true;
+        if (this.step === 3 && this.roster.loaded) this.$nextTick(() => this.renderIntegratedCharts());
+      },
+
+      resetFinancials() {
+        ['pyramidChart','costSnChart'].forEach(id => this.destroyChart(id));
+        this.financials = { loaded:false, ticker:'', data:null, loading:false, error:null, mode:'auto', manual:{ company:'', fiscal_year:'', total_revenue:'', ebitda:'', total_expenses:'', cost_of_revenue:'', rd:'', sga:'' } };
+        this.ai.integrated = { text: null, loading: false, chat: [] };
+      },
+
+      // ---- AI NARRATIVE ----
+      generateNarrative(section) {
+        this.ai[section].loading = true;
+        this.ai[section].chat = [];
+        setTimeout(() => {
+          this.ai[section].text = this.buildNarrativeText(section);
+          this.ai[section].loading = false;
+        }, 700);
+      },
+
+      buildNarrativeText(section) {
+        if (section === 'roster') {
+          const d = this.roster.data;
+          if (!d) return '';
+          const topFn = this.topFn(), topSn = this.topSn(), topCo = this.topCountry();
+
+          const model = (() => {
+            const fn = (topFn?.name || '').toLowerCase();
+            if (fn.includes('engineer') || fn.includes('tech') || fn.includes('software')) return 'product-driven or technology business';
+            if (fn.includes('sales') || fn.includes('commercial')) return 'commercial or sales-driven organization';
+            if (fn.includes('oper') || fn.includes('ops') || fn.includes('delivery')) return 'operations or delivery-intensive model';
+            if (fn.includes('research') || fn.includes('science')) return 'research-intensive organization';
+            return 'diversified workforce model';
+          })();
+
+          const snLine = d.senior_ratio > 25
+            ? `Senior leadership (VP+) is ${d.senior_ratio}% of headcount — unusually top-heavy, which may inflate the cost baseline or reflect a holding company structure.`
+            : d.senior_ratio < 10
+            ? `At ${d.senior_ratio}% VP+, the org is relatively flat — consistent with an execution-focused delivery model.`
+            : `Senior leadership at ${d.senior_ratio}% of headcount sits within a normal range.`;
+
+          const costLine = d.cost_concentration > 65
+            ? `Cost is highly concentrated: top-quartile earners account for ${d.cost_concentration}% of total spend — senior and executive compensation dominates the cost envelope.`
+            : d.cost_concentration < 45
+            ? `Compensation is well-distributed (top quartile = ${d.cost_concentration}% of spend), consistent with a junior or uniform pay structure.`
+            : `Cost spread is moderate (top quartile = ${d.cost_concentration}% of spend), typical for a professional services workforce.`;
+
+          const gap = d.avg_cost_per_employee > 0 ? Math.round((d.avg_cost_per_employee - d.median_cost) / d.avg_cost_per_employee * 100) : 0;
+          const medLine = gap > 20
+            ? `The ${gap}% gap between mean (${this.fmt(d.avg_cost_per_employee)}) and median (${this.fmt(d.median_cost)}) confirms high-earner skew — a handful of senior roles pulls the average up significantly.`
+            : `Mean (${this.fmt(d.avg_cost_per_employee)}) and median (${this.fmt(d.median_cost)}) are closely aligned, suggesting uniform compensation across levels.`;
+
+          const geoLine = d.num_countries > 5
+            ? `The workforce spans ${d.num_countries} countries with ${topCo?.name} as the primary hub (${topCo?.pct}%) — notable geographic dispersion with potential labor arbitrage opportunity.`
+            : `Operations are concentrated in ${d.num_countries} ${d.num_countries === 1 ? 'country' : 'countries'}, with ${topCo?.name} at ${topCo?.pct}% of headcount.`;
+
+          return `This ${d.total_headcount.toLocaleString()}-person roster is consistent with a ${model}. ${topFn?.name} leads at ${topFn?.pct}% of headcount, and ${topSn?.name} is the largest seniority band (${topSn?.pct}% of staff).\n\n${snLine} ${costLine}\n\n${medLine} ${geoLine}`;
+
+        } else if (section === 'integrated') {
+          const rd = this.roster.data, fd = this.financials.data;
+          if (!rd || !fd) return '';
+          const topFn = this.topFn(), topFnSpend = this.topFnSpend();
+          const revPerEmp = this.revenuePerEmployee();
+          const laborPct = rd && fd?.total_revenue ? Math.round(rd.total_labor_spend / fd.total_revenue * 100) : null;
+          const ebitdaPct = fd?.ebitda && fd?.total_revenue ? Math.round(fd.ebitda / fd.total_revenue * 100) : null;
+
+          const revLine = !revPerEmp ? '' : revPerEmp > 500000
+            ? `Revenue per employee of ${this.fmt(revPerEmp)} is exceptionally high — characteristic of software, financial services, or asset-light models with strong operating leverage.`
+            : revPerEmp > 200000
+            ? `Revenue per employee of ${this.fmt(revPerEmp)} is above average — this workforce generates solid output per head.`
+            : revPerEmp > 80000
+            ? `Revenue per employee of ${this.fmt(revPerEmp)} is mid-range — consistent with services, distribution, or mixed-model businesses.`
+            : `Revenue per employee of ${this.fmt(revPerEmp)} is relatively low — common in labor-intensive services or early-stage growth.`;
+
+          const laborLine = laborPct === null ? '' : laborPct < 10
+            ? `Labor at ${laborPct}% of revenue is exceptionally lean — headcount is not the primary cost driver. Focus diligence on COGS, capital, or R&D instead.`
+            : laborPct < 25
+            ? `Labor at ${laborPct}% of revenue is manageable — headcount growth can be absorbed without immediately threatening margins.`
+            : laborPct < 50
+            ? `Labor at ${laborPct}% of revenue is significant — headcount decisions directly shape profitability, and any workforce action would have material EBITDA impact.`
+            : `Labor at ${laborPct}% of revenue is the dominant cost driver — restructuring levers here would have outsized effect.`;
+
+          const ebitdaLine = ebitdaPct === null ? '' : ebitdaPct > 30
+            ? `EBITDA margin of ${ebitdaPct}% reflects strong operational leverage — this business can absorb investment without near-term margin risk.`
+            : ebitdaPct > 15
+            ? `EBITDA margin of ${ebitdaPct}% is solid but leaves room for efficiency improvement.`
+            : ebitdaPct > 0
+            ? `EBITDA margin of ${ebitdaPct}% is thin — the cost structure warrants scrutiny across all workforce scenarios.`
+            : `EBITDA margin is near zero or negative — the business is in investment or turnaround mode.`;
+
+          const oppLine = (() => {
+            const opps = [];
+            if (rd.senior_ratio > 20) opps.push(`senior-layer rationalization (${rd.senior_ratio}% VP+ of headcount)`);
+            if (rd.cost_concentration > 60) opps.push(`top-quartile compensation review (${rd.cost_concentration}% of spend in top 25%)`);
+            if (topFn && topFnSpend && topFn.name !== topFnSpend.name) opps.push(`rebalancing ${topFnSpend.name} (highest spend) vs. ${topFn.name} (largest headcount) allocation`);
+            if (rd.num_countries > 5) opps.push(`geographic footprint consolidation (${rd.num_countries} countries)`);
+            if (opps.length === 0) opps.push(`headcount rebalancing in ${topFn?.name}, which represents ${topFn?.pct}% of staff and is the primary people investment`);
+            return `Potential improvement areas worth modeling: ${opps.join('; ')}.`;
+          })();
+
+          return `Cross-referencing ${fd.company}'s ${rd.total_headcount.toLocaleString()} employees against FY${fd.fiscal_year} financials:\n\n${revLine} ${laborLine}\n\n${ebitdaLine}\n\n${oppLine}`;
+        }
+        return '';
+      },
+
+      askQuestion(section, q) {
+        const answer = this.buildAnswer(section, q);
+        this.ai[section].chat.push({ role: 'user', text: q });
+        this.ai[section].chat.push({ role: 'assistant', text: answer });
+      },
+
+      buildAnswer(section, q) {
+        const lq = q.toLowerCase();
+        if (section === 'roster') {
+          const d = this.roster.data;
+          const topFn = this.topFn(), topSn = this.topSn(), topCo = this.topCountry(), topFnSpend = this.topFnSpend();
+          if (lq.includes('seniority')) {
+            const sorted = sortBySeniority(Object.entries(d.by_seniority)).slice(0,3).map(([k,v])=>`${k} (${v})`).join(', ');
+            return `Dominant band: ${topSn?.name} (${topSn?.pct}%). Top three: ${sorted}. ${d.senior_ratio > 20 ? `High VP+ ratio (${d.senior_ratio}%) is notable — flag this in your analysis as potentially top-heavy.` : 'Pyramid shape appears balanced.'}`;
+          }
+          if (lq.includes('concentrat') || lq.includes('distribut')) {
+            return `Top-quartile earners hold ${d.cost_concentration}% of total spend. ${d.cost_concentration > 65 ? 'Highly concentrated — scrutinize VP+ compensation in diligence interviews.' : d.cost_concentration < 45 ? 'Well-distributed — compensation is relatively uniform across seniority levels.' : 'Moderate concentration — within normal range for this workforce size.'}`;
+          }
+          if (lq.includes('geograph') || lq.includes('risk')) {
+            return `${topCo?.name} accounts for ${topCo?.pct}% of headcount across ${d.num_countries} ${d.num_countries===1?'country':'countries'}. ${d.num_countries > 5 ? 'Geographic dispersion introduces execution complexity but enables labor cost arbitrage.' : 'Concentrated footprint simplifies management but limits labor cost flexibility.'}`;
+          }
+          if (lq.includes('function') || lq.includes('central') || lq.includes('model')) {
+            return `${topFn?.name} leads headcount (${topFn?.pct}%); ${topFnSpend?.name} leads spend (${Math.round((topFnSpend?.cost||0)/d.total_labor_spend*100)}% of labor). ${topFn?.name===topFnSpend?.name ? 'Same function dominates both — this is likely the core capability of the business.' : 'Different leaders by headcount vs. spend — the spend-heavy function commands premium talent.'}`;
+          }
+          if (lq.includes('restructur') || lq.includes('target')) {
+            const flags = [];
+            if (d.senior_ratio > 25) flags.push(`top-heavy structure (${d.senior_ratio}% VP+)`);
+            if (d.cost_concentration > 65) flags.push(`concentrated cost base (${d.cost_concentration}% in top quartile)`);
+            return flags.length > 0
+              ? `Restructuring signals: ${flags.join(', ')}. These are worth probing in management interviews.`
+              : `No single obvious restructuring lever. Compare function benchmarks against peer companies to identify outliers.`;
+          }
+          return `${d.total_headcount.toLocaleString()} employees, ${this.fmt(d.total_labor_spend)} total spend, ${d.senior_ratio}% senior ratio across ${d.num_countries} countries.`;
+
+        } else {
+          const rd = this.roster.data, fd = this.financials.data;
+          const revPerEmp = this.revenuePerEmployee();
+          const laborPct = rd && fd?.total_revenue ? Math.round(rd.total_labor_spend/fd.total_revenue*100) : null;
+          const ebitdaPct = fd?.ebitda && fd?.total_revenue ? Math.round(fd.ebitda/fd.total_revenue*100) : null;
+          const topFn = this.topFn(), topFnSpend = this.topFnSpend();
+
+          if (lq.includes('benchmark') || lq.includes('compare') || lq.includes('revenue per')) {
+            const tier = revPerEmp > 500000 ? 'top-quartile — comparable to large-cap software or financial services'
+              : revPerEmp > 200000 ? 'above median — typical for professional services or mid-cap tech'
+              : revPerEmp > 80000 ? 'mid-range — common in distribution or labor-intensive B2B'
+              : 'below average — typical of retail, staffing, or early-stage growth';
+            return `${fd.company}'s revenue per employee is ${this.fmt(revPerEmp)}: ${tier}.`;
+          }
+          if (lq.includes('labor') || lq.includes('signal')) {
+            return `Labor is ${laborPct}% of revenue. ${laborPct < 15 ? 'Lean ratio — headcount growth has limited EBITDA drag.' : laborPct < 30 ? `Manageable. A 10% headcount increase would reduce EBITDA margin by ~${Math.round(laborPct*0.1)} points.` : 'High ratio — any meaningful headcount action (up or down) has direct, material EBITDA implications.'}`;
+          }
+          if (lq.includes('cost optim') || lq.includes('opportunit')) {
+            const opps = [];
+            if (rd.senior_ratio > 20) opps.push(`VP+ rationalization (${rd.senior_ratio}% of headcount)`);
+            if (topFnSpend) opps.push(`${topFnSpend.name} function (${Math.round((topFnSpend.cost||0)/rd.total_labor_spend*100)}% of labor spend)`);
+            if (rd.num_countries > 3) opps.push(`geographic consolidation (${rd.num_countries} countries)`);
+            return `Top levers: ${opps.join('; ') || 'functional headcount rebalancing'}.`;
+          }
+          if (lq.includes('ebitda') || lq.includes('margin') || lq.includes('workforce')) {
+            return `At ${ebitdaPct}% EBITDA margin, ${fd.company} ${ebitdaPct > 25 ? 'has buffer to invest — workforce decisions can be made strategically.' : ebitdaPct > 10 ? 'has adequate but limited buffer — workforce actions should be targeted.' : 'is under pressure — workforce cost reduction may be a near-term operational imperative.'}`;
+          }
+          if (lq.includes('over') || lq.includes('under') || lq.includes('invest')) {
+            return `${topFn?.name} is ${topFn?.pct}% of headcount and ${Math.round((topFnSpend?.cost||0)/rd.total_labor_spend*100)}% of labor spend. Without peer benchmarks it's hard to say definitively — but if ${topFn?.name} is the primary revenue driver, this may be appropriate; if it's overhead, it's worth scrutinizing.`;
+          }
+          return `Revenue per employee: ${this.fmt(revPerEmp)}. Labor: ${laborPct}% of revenue. EBITDA margin: ${ebitdaPct}%.`;
+        }
+      },
+
+      // ---- COMPUTED ----
+      countryRows() {
+        if (!this.roster.data) return [];
+        const { by_country:byCt, cost_by_country:costByCt, total_headcount:total } = this.roster.data;
+        return Object.entries(byCt).sort((a,b)=>b[1]-a[1]).slice(0,10)
+          .map(([country,count]) => ({ country, count, pct: Math.round(count/total*100), cost: costByCt?.[country]||0 }));
+      },
+      revenuePerEmployee() {
+        const rev = this.financials.data?.total_revenue, hc = this.roster.data?.total_headcount;
+        return (rev && hc) ? Math.round(rev/hc) : null;
+      },
+      laborPct() {
+        const labor = this.roster.data?.total_labor_spend, rev = this.financials.data?.total_revenue;
+        if (!labor || !rev) return 'N/A';
+        const pct = labor / rev * 100;
+        if (pct >= 1) return Math.round(pct) + '%';
+        if (pct >= 0.1) return pct.toFixed(1) + '%';
+        return pct.toFixed(2) + '%';
+      },
+      ebitdaMargin() {
+        const e = this.financials.data?.ebitda, rev = this.financials.data?.total_revenue;
+        return (e !== null && e !== undefined && rev) ? Math.round(e/rev*100) + '%' : 'N/A';
+      },
+      topFn() {
+        if (!this.roster.data) return null;
+        const [name,count] = Object.entries(this.roster.data.by_function).sort((a,b)=>b[1]-a[1])[0]||[];
+        return name ? { name, count, pct: Math.round(count/this.roster.data.total_headcount*100) } : null;
+      },
+      topFnSpend() {
+        if (!this.roster.data) return null;
+        const [name,cost] = Object.entries(this.roster.data.cost_by_function).sort((a,b)=>b[1]-a[1])[0]||[];
+        return name ? { name, cost, pct: Math.round(cost/this.roster.data.total_labor_spend*100) } : null;
+      },
+      topSn() {
+        if (!this.roster.data) return null;
+        const [name,count] = Object.entries(this.roster.data.by_seniority).sort((a,b)=>b[1]-a[1])[0]||[];
+        return name ? { name, count, pct: Math.round(count/this.roster.data.total_headcount*100) } : null;
+      },
+      topCountry() {
+        if (!this.roster.data) return null;
+        const [name,count] = Object.entries(this.roster.data.by_country).sort((a,b)=>b[1]-a[1])[0]||[];
+        return name ? { name, pct: Math.round(count/this.roster.data.total_headcount*100) } : null;
+      },
+      opportunities() {
+        const rd = this.roster.data, fd = this.financials.data;
+        if (!rd || !fd) return [];
+        const opps = [];
+        const rev = fd.total_revenue, eb = fd.ebitda;
+        const labor = rd.total_labor_spend, hc = rd.total_headcount;
+        const topFn = this.topFn(), topFnSpend = this.topFnSpend();
+        const avgCost = rd.avg_cost_per_employee;
+
+        // 1. Senior layer — if VP+ ratio > 20%, model a 15% reduction
+        if (rd.senior_ratio > 20) {
+          const seniorSpend = (rd.cost_concentration / 100) * labor;
+          const saving = Math.round(seniorSpend * 0.15);
+          opps.push({
+            title: `Senior layer rationalization (${rd.senior_ratio}% VP+ of workforce)`,
+            detail: `A ${rd.senior_ratio}% VP/Director ratio is above typical benchmarks (10–15% for most companies). A 15% reduction in senior headcount could free up significant spend without touching delivery capacity.`,
+            impact: `Est. savings: ${this.fmt(saving)} / year`,
+          });
+        }
+
+        // 2. Top-function concentration — if >35% of headcount in one function
+        if (topFn && topFn.pct > 35) {
+          const benchmarkPct = 25;
+          const excess = topFn.count - Math.round(hc * benchmarkPct / 100);
+          const saving = excess * avgCost;
+          opps.push({
+            title: `${topFn.name} function concentration (${topFn.pct}% of headcount)`,
+            detail: `${topFn.name} dominates the org at ${topFn.pct}% of staff — well above the typical 20–25% ceiling for a single function. Benchmarking against peers could reveal whether this reflects strategic over-investment or structural bloat.`,
+            impact: excess > 0 ? `Rightsizing to 25% = ~${excess} roles, ${this.fmt(saving)} in potential savings` : null,
+          });
+        }
+
+        // 3. Cost concentration — top quartile captures >60%
+        if (rd.cost_concentration > 60) {
+          const topQCost = (rd.cost_concentration / 100) * labor;
+          opps.push({
+            title: `Top-quartile compensation review (${rd.cost_concentration}% of spend in top 25% of earners)`,
+            detail: `The top 25% of earners account for ${rd.cost_concentration}% of total labor spend — a compressed pay pyramid where a small number of senior roles drive outsized cost. Review compensation benchmarks against industry and probe in management interviews.`,
+            impact: `Top-quartile envelope: ${this.fmt(topQCost)}`,
+          });
+        }
+
+        // 4. Geographic arbitrage — if US share is >60% and multi-country
+        const usCost = rd.cost_by_country?.['United States'] || rd.cost_by_country?.['US'] || 0;
+        const usHc = rd.by_country?.['United States'] || rd.by_country?.['US'] || 0;
+        if (rd.num_countries > 1 && usCost > labor * 0.6 && usHc > 0) {
+          const arbitrageSaving = Math.round(usCost * 0.2);
+          opps.push({
+            title: `Geographic labor arbitrage (${Math.round(usCost/labor*100)}% of spend in US)`,
+            detail: `US-based talent is significantly more expensive than equivalent roles in the existing international locations. Shifting 15–20% of US roles to lower-cost geographies where the company already operates could materially reduce the cost base.`,
+            impact: `20% shift could yield ~${this.fmt(arbitrageSaving)} in annual savings`,
+          });
+        }
+
+        // 5. SG&A efficiency — if SG&A > 15% of revenue
+        const sga = fd.expense_breakdown?.selling_general_admin;
+        if (sga && rev && sga / rev > 0.15) {
+          const sgaPct = Math.round(sga / rev * 100);
+          const benchmark = Math.round(rev * 0.10);
+          const gap = sga - benchmark;
+          opps.push({
+            title: `SG&A efficiency gap (${sgaPct}% of revenue vs. ~10% benchmark)`,
+            detail: `SG&A at ${sgaPct}% of revenue exceeds the ~10% benchmark for companies at this scale. Cross-referencing the roster's overhead functions (HR, Finance, Legal) against this spend line can identify whether the inefficiency is headcount-driven or vendor/infrastructure cost.`,
+            impact: `Closing to 10% benchmark: ${this.fmt(gap)} in potential reduction`,
+          });
+        }
+
+        // 6. R&D leverage — if R&D > 10% and rev/emp is very high
+        const rd_exp = fd.expense_breakdown?.research_and_development;
+        const revPerEmp = this.revenuePerEmployee();
+        if (rd_exp && rev && rd_exp / rev > 0.08 && revPerEmp > 300000) {
+          opps.push({
+            title: `R&D productivity assessment (${Math.round(rd_exp/rev*100)}% of revenue)`,
+            detail: `At ${this.fmt(rd_exp)} in R&D spend and ${this.fmt(revPerEmp)} revenue per employee, the question is whether R&D investment is translating to product differentiation and pricing power. Benchmarking output metrics (product launches, patents, NPS) against this spend level is a key diligence workstream.`,
+            impact: null,
+          });
+        }
+
+        // 7. Headcount vs revenue scale — if rev/emp is very low (labor-intensive)
+        if (revPerEmp && revPerEmp < 100000) {
+          opps.push({
+            title: `Revenue per employee gap vs. peers (${this.fmt(revPerEmp)} per head)`,
+            detail: `At ${this.fmt(revPerEmp)} revenue per employee, this workforce is significantly less productive than industry averages for comparable businesses ($150K–$300K+). Automation, process re-engineering, or headcount right-sizing are likely levers to close the gap.`,
+            impact: `Closing to $200K/head implies a path to ${this.fmt(Math.round(rev / 200000))} optimal headcount vs. current ${hc.toLocaleString()}`,
+          });
+        }
+
+        // Default if nothing fires
+        if (opps.length === 0) {
+          opps.push({
+            title: 'Functional headcount benchmarking',
+            detail: `Load a larger roster sample to generate data-driven opportunities. With the current dataset, compare ${topFn?.name || 'top function'} headcount ratios against direct peers to identify structural inefficiencies.`,
+            impact: null,
+          });
+        }
+
+        return opps;
+      },
+
+      pct(val, total) { return (!val||!total) ? 0 : Math.min(100, Math.round(val/total*100)); },
+      fmt(val) {
+        if (val === null || val === undefined || isNaN(val)) return 'N/A';
+        const a = Math.abs(val);
+        if (a >= 1e12) return '$' + (val/1e12).toFixed(2) + 'T';
+        if (a >= 1e9)  return '$' + (val/1e9).toFixed(1) + 'B';
+        if (a >= 1e6)  return '$' + (val/1e6).toFixed(1) + 'M';
+        if (a >= 1e3)  return '$' + (val/1e3).toFixed(0) + 'K';
+        return '$' + Math.round(val).toLocaleString();
+      },
+
+      // ---- CHARTS ----
+      destroyChart(id) { if (this.charts[id]) { this.charts[id].destroy(); delete this.charts[id]; } },
+
+      renderRosterCharts() {
+        if (!this.roster.data) return;
+        const { by_function:bf, by_seniority:bs, cost_by_function:cf } = this.roster.data;
+        const fmt = this.fmt.bind(this);
+
+        // Headcount by function
+        this.destroyChart('fnChart');
+        const fnCtx = document.getElementById('fnChart');
+        if (fnCtx) {
+          const sorted = Object.entries(bf).sort((a,b)=>b[1]-a[1]);
+          this.charts['fnChart'] = new Chart(fnCtx, {
+            type: 'bar',
+            data: { labels: sorted.map(([k])=>k), datasets:[{ data: sorted.map(([,v])=>v), backgroundColor: AP_COLORS, borderRadius:4 }] },
+            options: { indexAxis:'y', plugins:{legend:{display:false}}, scales:{ x:{grid:{display:false},ticks:{font:{size:11}}}, y:{grid:{display:false},ticks:{font:{size:11}}} }, responsive:true, maintainAspectRatio:true }
+          });
+        }
+
+        // Seniority
+        this.destroyChart('snChart');
+        const snCtx = document.getElementById('snChart');
+        if (snCtx) {
+          const sorted = sortBySeniority(Object.entries(bs));
+          this.charts['snChart'] = new Chart(snCtx, {
+            type: 'bar',
+            data: { labels: sorted.map(([k])=>k), datasets:[{ data: sorted.map(([,v])=>v), backgroundColor: sorted.map((_,i)=>AP_COLORS[i%AP_COLORS.length]), borderRadius:4 }] },
+            options: { indexAxis:'y', plugins:{legend:{display:false}}, scales:{ x:{grid:{display:false},ticks:{font:{size:11}}}, y:{grid:{display:false},ticks:{font:{size:11}}} }, responsive:true }
+          });
+        }
+
+        // Cost by function
+        this.destroyChart('costFnChart');
+        const cfCtx = document.getElementById('costFnChart');
+        if (cfCtx) {
+          const sorted = Object.entries(cf).sort((a,b)=>b[1]-a[1]);
+          this.charts['costFnChart'] = new Chart(cfCtx, {
+            type: 'bar',
+            data: { labels: sorted.map(([k])=>k), datasets:[{ data: sorted.map(([,v])=>v), backgroundColor:'#498E2B', borderRadius:4 }] },
+            options: {
+              indexAxis:'y', plugins:{ legend:{display:false}, tooltip:{ callbacks:{ label:(ctx)=>' '+fmt(ctx.raw) } } },
+              scales:{ x:{ grid:{display:false}, ticks:{ font:{size:11}, callback:(v)=>fmt(v) } }, y:{ grid:{display:false}, ticks:{font:{size:11}} } },
+              responsive:true
+            }
+          });
+        }
+      },
+
+      renderIntegratedCharts() {
+        if (!this.roster.data || !this.financials.data) return;
+        const { by_seniority:bs, cost_by_seniority:cs } = this.roster.data;
+        const fmt = this.fmt.bind(this);
+        const sorted = sortBySeniority(Object.entries(bs));
+
+        this.destroyChart('pyramidChart');
+        const pyCtx = document.getElementById('pyramidChart');
+        if (pyCtx) {
+          this.charts['pyramidChart'] = new Chart(pyCtx, {
+            type: 'bar',
+            data: {
+              labels: sorted.map(([k])=>k),
+              datasets:[{ data: sorted.map(([,v])=>v),
+                backgroundColor: sorted.map((_,i) => `rgba(73,142,43,${0.4 + (i/Math.max(sorted.length-1,1))*0.6})`),
+                borderRadius:4 }]
+            },
+            options: { indexAxis:'y', plugins:{legend:{display:false}}, scales:{ x:{grid:{display:false},ticks:{font:{size:11}}}, y:{grid:{display:false},ticks:{font:{size:11}}} }, responsive:true }
+          });
+        }
+
+        this.destroyChart('costSnChart');
+        const csCtx = document.getElementById('costSnChart');
+        if (csCtx) {
+          this.charts['costSnChart'] = new Chart(csCtx, {
+            type: 'bar',
+            data: { labels: sorted.map(([k])=>k), datasets:[{ data: sorted.map(([k])=>cs[k]||0), backgroundColor:'#5CB335', borderRadius:4 }] },
+            options: {
+              indexAxis:'y', plugins:{ legend:{display:false}, tooltip:{ callbacks:{ label:(ctx)=>' '+fmt(ctx.raw) } } },
+              scales:{ x:{ grid:{display:false}, ticks:{ font:{size:11}, callback:(v)=>fmt(v) } }, y:{ grid:{display:false}, ticks:{font:{size:11}} } },
+              responsive:true
+            }
+          });
+        }
+      },
+    };
+  }
+  </script>
+</body>
+</html>
