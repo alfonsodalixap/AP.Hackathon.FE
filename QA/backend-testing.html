@@ -1,0 +1,578 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: Calibri, sans-serif; font-size: 11pt; color: #1a1a1a; line-height: 1.6; }
+
+  /* ── COVER PAGE ── */
+  .cover { width:100%; height:100vh; min-height:26cm; page-break-after:always; display:flex; flex-direction:column; padding:0; }
+  .cover-top { background-color:#1F3864; color:white; padding:3cm 2.5cm 2cm 2.5cm; flex:0 0 auto; }
+  .cover-top .label { font-size:10pt; letter-spacing:3px; text-transform:uppercase; color:#8FB4D9; margin-bottom:18px; }
+  .cover-top h1 { font-size:36pt; font-weight:700; line-height:1.1; margin-bottom:10px; color:white; border:none; }
+  .cover-top .project-name { font-size:15pt; color:#BDD7EE; margin-top:8px; }
+  .cover-mid { background-color:#2E5496; padding:0.5cm 2.5cm; flex:0 0 auto; }
+  .cover-mid .tagline { color:#DDEEFF; font-size:11pt; font-style:italic; }
+  .cover-body { background-color:#F5F7FA; flex:1; padding:1.5cm 2.5cm; display:flex; flex-direction:column; justify-content:space-between; }
+  .cover-meta-grid { display:grid; grid-template-columns:1fr 1fr; gap:0.8cm 1.2cm; margin-bottom:1cm; }
+  .cover-meta-item .meta-label { font-size:8pt; text-transform:uppercase; letter-spacing:1.5px; color:#2E5496; font-weight:700; margin-bottom:3px; }
+  .cover-meta-item .meta-value { font-size:11pt; color:#1a1a1a; }
+  .cover-scope { background:white; border-left:4px solid #2E5496; padding:14px 18px; margin-top:0.4cm; }
+  .cover-scope .scope-title { font-size:9pt; text-transform:uppercase; letter-spacing:1.5px; color:#2E5496; font-weight:700; margin-bottom:8px; }
+  .cover-scope ul { padding-left:18px; }
+  .cover-scope li { font-size:10.5pt; color:#333; margin-bottom:4px; }
+  .cover-footer { background-color:#1F3864; padding:0.35cm 2.5cm; color:#8FB4D9; font-size:9pt; flex:0 0 auto; }
+
+  /* ── CONTENT ── */
+  .content { padding:1.8cm 2.2cm; }
+  h1 { font-size:18pt; color:#1F3864; border-bottom:2px solid #1F3864; padding-bottom:5px; margin-top:30px; margin-bottom:12px; }
+  h1:first-child { margin-top:0; }
+  h2 { font-size:13pt; color:#2E5496; margin-top:20px; margin-bottom:8px; }
+  h3 { font-size:11pt; color:#2E5496; margin-top:14px; margin-bottom:6px; font-weight:700; }
+  p  { margin-bottom:8px; }
+  ul { padding-left:20px; margin:6px 0 10px 0; }
+  li { margin-bottom:4px; }
+  table { border-collapse:collapse; width:100%; margin:10px 0 16px 0; font-size:10.5pt; }
+  th { background-color:#1F3864; color:white; padding:8px 11px; text-align:left; font-weight:600; }
+  td { padding:7px 11px; border:1px solid #D0D7E6; vertical-align:top; }
+  tr:nth-child(even) td { background-color:#F0F4FB; }
+  code { background:#EAECF4; padding:1px 5px; border-radius:3px; font-family:Consolas,monospace; font-size:9.5pt; color:#1F3864; }
+  pre { background:#1E2233; border-radius:5px; padding:14px 18px; margin:10px 0 16px 0; overflow-x:auto; }
+  pre code { background:none; padding:0; font-size:8.5pt; color:#CDD6F4; line-height:1.55; }
+  .section-note { background:#EEF3FB; border-left:4px solid #2E5496; padding:10px 14px; margin:10px 0 16px 0; font-size:10pt; }
+  .warn-note { background:#FFF8EC; border-left:4px solid #C9850A; padding:10px 14px; margin:10px 0 16px 0; font-size:10pt; }
+  .tag-ok   { background:#E2EFDA; color:#375623; padding:2px 8px; border-radius:3px; font-weight:700; font-size:9pt; }
+  .tag-skip { background:#FCE4D6; color:#843C0C; padding:2px 8px; border-radius:3px; font-size:9pt; }
+  .page-break { page-break-before:always; }
+</style>
+</head>
+<body>
+
+<!-- ══════════════ COVER ══════════════ -->
+<div class="cover">
+  <div class="cover-top">
+    <div class="label">Quality Assurance · AlixPartners</div>
+    <h1>Backend Testing Guide</h1>
+    <div class="project-name">Outside-In Due Diligence Tool</div>
+  </div>
+  <div class="cover-mid">
+    <span class="tagline">Laravel 13 / PHP 8.4 — PHPUnit test strategy, API contracts &amp; CI integration</span>
+  </div>
+  <div class="cover-body">
+    <div>
+      <div class="cover-meta-grid">
+        <div class="cover-meta-item">
+          <div class="meta-label">Version</div>
+          <div class="meta-value">1.0 — Draft</div>
+        </div>
+        <div class="cover-meta-item">
+          <div class="meta-label">Date</div>
+          <div class="meta-value">April 29, 2026</div>
+        </div>
+        <div class="cover-meta-item">
+          <div class="meta-label">Author</div>
+          <div class="meta-value">Alejandro Lupo (QA)</div>
+        </div>
+        <div class="cover-meta-item">
+          <div class="meta-label">Backend Dev</div>
+          <div class="meta-value">Dehyvis Coronel Lecuna</div>
+        </div>
+        <div class="cover-meta-item">
+          <div class="meta-label">Framework</div>
+          <div class="meta-value">Laravel 13 · PHP 8.4 · PHPUnit 12.5</div>
+        </div>
+        <div class="cover-meta-item">
+          <div class="meta-label">Database</div>
+          <div class="meta-value">SQL Server 2022 (dev) · SQLite :memory: (tests)</div>
+        </div>
+      </div>
+      <div class="cover-scope">
+        <div class="scope-title">Endpoints under test</div>
+        <ul>
+          <li><b>GET /api/health</b> — Application health check.</li>
+          <li><b>POST /api/roster/analyze</b> — Excel file parsing, KPI calculation (headcount, labor spend, breakdowns).</li>
+          <li><b>GET /api/financials/{ticker}</b> — SEC EDGAR 10-K data retrieval and mapping.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+  <div class="cover-footer">Outside-In Due Diligence Tool · Backend Testing Guide v1.0 · AlixPartners Hackathon 2026</div>
+</div>
+
+<!-- ══════════════ CONTENT ══════════════ -->
+<div class="content">
+
+<h1>1. Overview</h1>
+<p>This document describes the backend testing strategy and conventions for the Laravel 13 / PHP 8.4 API. It covers unit tests, feature (integration) tests, and API contract validation for the three core endpoints powering the Outside-In Due Diligence Tool.</p>
+<table>
+  <tr><th>Component</th><th>Technology</th></tr>
+  <tr><td>Framework</td><td>Laravel 13</td></tr>
+  <tr><td>Language</td><td>PHP 8.4</td></tr>
+  <tr><td>Test runner</td><td>PHPUnit 12.5.12</td></tr>
+  <tr><td>Test database</td><td>SQLite <code>:memory:</code></td></tr>
+  <tr><td>Production database</td><td>SQL Server 2022</td></tr>
+  <tr><td>Container orchestration</td><td>Docker Compose</td></tr>
+</table>
+
+<h1>2. Test Environment Setup</h1>
+
+<h2>2.1 Prerequisites</h2>
+<ul>
+  <li>Docker Desktop running</li>
+  <li>Project cloned at <code>AP.Hackathon.BE/</code></li>
+  <li><code>.env</code> copied from <code>.env.example</code></li>
+</ul>
+
+<h2>2.2 First-time Setup</h2>
+<pre><code>cd AP.Hackathon.BE
+make build       # Build Docker images (PHP 8.4 + Nginx + SQL Server)
+make install     # composer install + migrate + generate app key
+make up          # Start all containers</code></pre>
+
+<h2>2.3 Running Tests</h2>
+<pre><code># Run the full test suite
+make test
+
+# Run with HTML coverage report (output → coverage/)
+make test-coverage
+
+# Run only Unit tests
+docker compose exec app php artisan test --testsuite=Unit
+
+# Run only Feature tests
+docker compose exec app php artisan test --testsuite=Feature
+
+# Run a single test file
+docker compose exec app php artisan test tests/Feature/RosterAnalysisTest.php
+
+# Run a single test method
+docker compose exec app php artisan test --filter test_analyze_returns_correct_headcount_kpi</code></pre>
+
+<h2>2.4 Test Configuration (<code>phpunit.xml</code>)</h2>
+<p>Key environment overrides applied during every test run:</p>
+<table>
+  <tr><th>Variable</th><th>Test Value</th><th>Reason</th></tr>
+  <tr><td><code>APP_ENV</code></td><td><code>testing</code></td><td>Disables certain middleware and cache</td></tr>
+  <tr><td><code>DB_CONNECTION</code></td><td><code>sqlite</code></td><td>Fast in-memory DB — no SQL Server dependency</td></tr>
+  <tr><td><code>DB_DATABASE</code></td><td><code>:memory:</code></td><td>Isolated, reset after every test run</td></tr>
+  <tr><td><code>CACHE_STORE</code></td><td><code>array</code></td><td>No Redis / file side-effects</td></tr>
+  <tr><td><code>QUEUE_CONNECTION</code></td><td><code>sync</code></td><td>Jobs execute immediately in tests</td></tr>
+  <tr><td><code>SESSION_DRIVER</code></td><td><code>array</code></td><td>No file I/O</td></tr>
+  <tr><td><code>BCRYPT_ROUNDS</code></td><td><code>4</code></td><td>Faster password hashing</td></tr>
+</table>
+
+<div class="section-note">
+  Tests run against <b>SQLite in-memory</b>, not SQL Server. For SQL Server-specific validation see the <b>Database Testing Guide</b>.
+</div>
+
+<div class="page-break"></div>
+<h1>3. Test Structure</h1>
+<pre><code>tests/
+├── Feature/                        # HTTP-level integration tests
+│   ├── ExampleTest.php             # Laravel scaffold example
+│   ├── HealthCheckTest.php         # GET /api/health
+│   ├── RosterAnalysisTest.php      # POST /api/roster/analyze
+│   └── FinancialsTest.php          # GET /api/financials/{ticker}
+├── Unit/                           # Isolated service/logic tests
+│   ├── ExampleTest.php             # Laravel scaffold example
+│   ├── RosterParserTest.php        # Excel parsing logic
+│   ├── KpiCalculatorTest.php       # KPI computation rules
+│   └── FinancialsMapperTest.php    # SEC EDGAR response mapping
+├── fixtures/                       # Static test data files
+│   ├── WorkshopRoster.xlsx
+│   ├── sec-edgar-aapl.json
+│   └── roster-missing-flc.xlsx
+└── TestCase.php                    # Base class (extends Laravel's)</code></pre>
+
+<div class="section-note">
+  <b>Convention:</b> Feature tests verify HTTP request → response. Unit tests verify a single class in isolation — no database, no HTTP.
+</div>
+
+<h1>4. Unit Tests</h1>
+<p>Unit tests live in <code>tests/Unit/</code> and test one class at a time. External dependencies (HTTP clients, DB) must be mocked or stubbed.</p>
+
+<h2>4.1 KPI Calculator</h2>
+<pre><code>// tests/Unit/KpiCalculatorTest.php
+namespace Tests\Unit;
+
+use App\Services\KpiCalculator;
+use Tests\TestCase;
+
+class KpiCalculatorTest extends TestCase
+{
+    private KpiCalculator $calculator;
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+        $this->calculator = new KpiCalculator();
+    }
+
+    public function test_headcount_equals_row_count(): void
+    {
+        $roster = $this->makeRoster(rows: 42);
+        $kpis   = $this->calculator->compute($roster);
+
+        $this->assertSame(42, $kpis['total_headcount']);
+    }
+
+    public function test_labor_spend_sums_flc_column(): void
+    {
+        $roster = [
+            ['FLC' => 120_000],
+            ['FLC' =>  80_000],
+            ['FLC' => 100_000],
+        ];
+        $this->assertSame(300_000, $this->calculator->compute($roster)['total_labor_spend']);
+    }
+
+    public function test_function_distribution_groups_by_job_function(): void
+    {
+        $roster = [
+            ['Job Function' => 'Engineering'],
+            ['Job Function' => 'Engineering'],
+            ['Job Function' => 'Finance'],
+        ];
+        $this->assertSame(
+            ['Engineering' => 2, 'Finance' => 1],
+            $this->calculator->compute($roster)['by_function']
+        );
+    }
+
+    public function test_average_labor_cost_rounds_to_two_decimals(): void
+    {
+        $roster = [['FLC' => 100_001], ['FLC' => 100_002]];
+        $this->assertSame(100_001.50, $this->calculator->compute($roster)['avg_labor_cost']);
+    }
+
+    // ── helper ───────────────────────────────────────────────────
+    private function makeRoster(int $rows): array
+    {
+        return array_fill(0, $rows, [
+            'Employ ID'    => 'EMP001',
+            'Job Title'    => 'Analyst',
+            'Job Function' => 'Finance',
+            'Seniority'    => 'Junior',
+            'Country'      => 'US',
+            'FLC'          => 90_000,
+        ]);
+    }
+}</code></pre>
+
+<h2>4.2 Roster Parser</h2>
+<pre><code>// tests/Unit/RosterParserTest.php
+class RosterParserTest extends TestCase
+{
+    public function test_parse_returns_array_of_rows(): void
+    {
+        $file = UploadedFile::fake()->createWithContent(
+            'roster.xlsx',
+            file_get_contents(base_path('tests/fixtures/WorkshopRoster.xlsx'))
+        );
+        $rows = (new RosterParser())->parse($file);
+
+        $this->assertIsArray($rows);
+        $this->assertNotEmpty($rows);
+        $this->assertArrayHasKey('Employ ID', $rows[0]);
+    }
+
+    public function test_parse_throws_on_missing_required_column(): void
+    {
+        $this->expectException(\App\Exceptions\InvalidRosterException::class);
+        $this->expectExceptionCode(422);
+
+        $file = UploadedFile::fake()->createWithContent(
+            'bad.xlsx', $this->makeXlsxWithoutColumn('FLC')
+        );
+        (new RosterParser())->parse($file);
+    }
+
+    public function test_parse_trims_whitespace_from_string_fields(): void
+    {
+        $rows = (new RosterParser())->parseFromArray([
+            ['Employ ID' => 'E001', 'Job Title' => '  Analyst  ', 'FLC' => '90000'],
+        ]);
+        $this->assertSame('Analyst', $rows[0]['Job Title']);
+    }
+}</code></pre>
+
+<h2>4.3 Financials Mapper</h2>
+<pre><code>// tests/Unit/FinancialsMapperTest.php
+class FinancialsMapperTest extends TestCase
+{
+    public function test_maps_sec_edgar_response_to_dto(): void
+    {
+        $payload = json_decode(
+            file_get_contents(base_path('tests/fixtures/sec-edgar-aapl.json')), true
+        );
+        $dto = (new FinancialsMapper())->map($payload);
+
+        $this->assertSame('AAPL', $dto->ticker);
+        $this->assertIsNumeric($dto->revenue);
+        $this->assertIsNumeric($dto->ebitda);
+        $this->assertIsNumeric($dto->totalExpenses);
+        $this->assertIsNumeric($dto->depreciationAmortization);
+    }
+
+    public function test_mapper_returns_null_for_missing_fields(): void
+    {
+        $dto = (new FinancialsMapper())->map(['facts' => []]);
+        $this->assertNull($dto->revenue);
+        $this->assertNull($dto->ebitda);
+    }
+}</code></pre>
+
+<div class="page-break"></div>
+<h1>5. Feature Tests — API Endpoints</h1>
+<p>Feature tests make real HTTP requests against the full Laravel stack. Use the <code>RefreshDatabase</code> trait to ensure a clean schema before each test class.</p>
+
+<h2>5.1 Health Check — <code>GET /api/health</code></h2>
+<pre><code>// tests/Feature/HealthCheckTest.php
+class HealthCheckTest extends TestCase
+{
+    public function test_health_returns_200(): void
+    {
+        $this->getJson('/api/health')
+             ->assertStatus(200)
+             ->assertJsonStructure(['status', 'timestamp']);
+    }
+
+    public function test_health_status_is_ok(): void
+    {
+        $this->getJson('/api/health')
+             ->assertJson(['status' => 'ok']);
+    }
+}</code></pre>
+
+<h3>Expected Response (200)</h3>
+<pre><code>{
+  "status": "ok",
+  "timestamp": "2026-04-29T12:00:00Z"
+}</code></pre>
+
+<h2>5.2 Roster Analysis — <code>POST /api/roster/analyze</code></h2>
+<h3>Happy Path</h3>
+<pre><code>// tests/Feature/RosterAnalysisTest.php
+class RosterAnalysisTest extends TestCase
+{
+    // TC-BE-001
+    public function test_analyze_accepts_valid_xlsx_and_returns_kpis(): void
+    {
+        $file = UploadedFile::fake()->createWithContent(
+            'roster.xlsx',
+            file_get_contents(base_path('tests/fixtures/WorkshopRoster.xlsx'))
+        );
+        $this->postJson('/api/roster/analyze', ['file' => $file])
+             ->assertStatus(200)
+             ->assertJsonStructure([
+                 'total_headcount', 'total_labor_spend', 'avg_labor_cost',
+                 'by_function', 'by_seniority', 'by_country',
+             ]);
+    }
+
+    // TC-BE-002 — WorkshopRoster.xlsx has 26 employees
+    public function test_analyze_returns_correct_headcount_for_workshop_fixture(): void
+    {
+        $file = UploadedFile::fake()->createWithContent(
+            'roster.xlsx',
+            file_get_contents(base_path('tests/fixtures/WorkshopRoster.xlsx'))
+        );
+        $this->postJson('/api/roster/analyze', ['file' => $file])
+             ->assertJsonPath('total_headcount', 26);
+    }
+
+    // TC-BE-003 — WorkshopRoster.xlsx covers 2 countries
+    public function test_analyze_returns_correct_country_breakdown(): void
+    {
+        $file = UploadedFile::fake()->createWithContent(
+            'roster.xlsx',
+            file_get_contents(base_path('tests/fixtures/WorkshopRoster.xlsx'))
+        );
+        $response = $this->postJson('/api/roster/analyze', ['file' => $file]);
+        $this->assertCount(2, $response->json('by_country'));
+    }
+}</code></pre>
+
+<h3>Error Scenarios</h3>
+<pre><code>    // TC-BE-004 — no file attached
+    public function test_analyze_returns_422_when_file_missing(): void
+    {
+        $this->postJson('/api/roster/analyze', [])
+             ->assertStatus(422)
+             ->assertJsonValidationErrorFor('file');
+    }
+
+    // TC-BE-005 — required column absent
+    public function test_analyze_returns_422_when_required_column_missing(): void
+    {
+        $fileWithoutFlc = UploadedFile::fake()->createWithContent(
+            'bad.xlsx', $this->makeMissingColumnFixture('FLC')
+        );
+        $this->postJson('/api/roster/analyze', ['file' => $fileWithoutFlc])
+             ->assertStatus(422)
+             ->assertJsonPath('error.code', 'MISSING_COLUMN');
+    }
+
+    // TC-BE-006 — wrong file type
+    public function test_analyze_returns_400_for_non_xlsx_file(): void
+    {
+        $csv = UploadedFile::fake()->create('roster.csv', 1, 'text/csv');
+        $this->postJson('/api/roster/analyze', ['file' => $csv])
+             ->assertStatus(400)
+             ->assertJsonPath('error.code', 'INVALID_FILE_FORMAT');
+    }
+
+    // TC-BE-007 — empty file
+    public function test_analyze_returns_400_for_empty_xlsx(): void
+    {
+        $empty = UploadedFile::fake()->create('empty.xlsx', 0,
+            'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        $this->postJson('/api/roster/analyze', ['file' => $empty])
+             ->assertStatus(400)
+             ->assertJsonPath('error.code', 'EMPTY_FILE');
+    }</code></pre>
+
+<h3>Response Shapes</h3>
+<table>
+  <tr><th>Status</th><th>Shape</th></tr>
+  <tr>
+    <td>200 OK</td>
+    <td><code>{ total_headcount, total_labor_spend, avg_labor_cost, by_function{}, by_seniority{}, by_country{} }</code></td>
+  </tr>
+  <tr>
+    <td>4xx Error</td>
+    <td><code>{ error: { code, message, details{} } }</code></td>
+  </tr>
+</table>
+
+<div class="page-break"></div>
+<h2>5.3 Financials — <code>GET /api/financials/{ticker}</code></h2>
+<pre><code>// tests/Feature/FinancialsTest.php
+class FinancialsTest extends TestCase
+{
+    protected function setUp(): void
+    {
+        parent::setUp();
+        Http::fake([
+            'data.sec.gov/*' => Http::response(
+                json_decode(file_get_contents(
+                    base_path('tests/fixtures/sec-edgar-aapl.json')), true),
+                200
+            ),
+        ]);
+    }
+
+    // TC-BE-008
+    public function test_financials_returns_200_for_valid_ticker(): void
+    {
+        $this->getJson('/api/financials/AAPL')
+             ->assertStatus(200)
+             ->assertJsonStructure([
+                 'ticker', 'revenue', 'ebitda',
+                 'total_expenses', 'depreciation_amortization', 'fiscal_year',
+             ]);
+    }
+
+    // TC-BE-009 — case-insensitive ticker
+    public function test_financials_ticker_is_case_insensitive(): void
+    {
+        $lower = $this->getJson('/api/financials/aapl')->json();
+        $upper = $this->getJson('/api/financials/AAPL')->json();
+        $this->assertSame($lower['revenue'], $upper['revenue']);
+    }
+
+    // TC-BE-010 — unknown ticker
+    public function test_financials_returns_404_for_unknown_ticker(): void
+    {
+        Http::fake(['data.sec.gov/*' => Http::response([], 404)]);
+        $this->getJson('/api/financials/XXXXXXXXXXX')
+             ->assertStatus(404)
+             ->assertJsonPath('error.code', 'TICKER_NOT_FOUND');
+    }
+
+    // TC-BE-011 — SEC EDGAR offline
+    public function test_financials_returns_502_when_sec_edgar_is_down(): void
+    {
+        Http::fake(['data.sec.gov/*' => Http::response([], 503)]);
+        $this->getJson('/api/financials/AAPL')
+             ->assertStatus(502)
+             ->assertJsonPath('error.code', 'UPSTREAM_UNAVAILABLE');
+    }
+
+    // TC-BE-012 — invalid format
+    public function test_financials_returns_422_for_invalid_ticker_format(): void
+    {
+        $this->getJson('/api/financials/123INVALID!!!')
+             ->assertStatus(422)
+             ->assertJsonPath('error.code', 'INVALID_TICKER');
+    }
+}</code></pre>
+
+<h1>6. Test Fixtures</h1>
+<p>Place fixture files in <code>AP.Hackathon.BE/tests/fixtures/</code>:</p>
+<table>
+  <tr><th>File</th><th>Purpose</th></tr>
+  <tr><td><code>WorkshopRoster.xlsx</code></td><td>26-employee roster — 2 countries, 9 functions. Copy from <code>QA/WorkshopRoster.xlsx</code>.</td></tr>
+  <tr><td><code>sec-edgar-aapl.json</code></td><td>Mocked SEC EDGAR response for AAPL (full facts payload).</td></tr>
+  <tr><td><code>sec-edgar-empty.json</code></td><td>SEC EDGAR response with empty <code>facts</code> object.</td></tr>
+  <tr><td><code>roster-missing-flc.xlsx</code></td><td>Valid XLSX missing the <code>FLC</code> column — triggers 422.</td></tr>
+  <tr><td><code>roster-empty.xlsx</code></td><td>Valid XLSX with header row only — triggers 400 EMPTY_FILE.</td></tr>
+</table>
+<pre><code># Copy the workshop roster from the QA folder
+cp QA/WorkshopRoster.xlsx AP.Hackathon.BE/tests/fixtures/WorkshopRoster.xlsx</code></pre>
+
+<h1>7. API Contract Summary</h1>
+<table>
+  <tr><th>Endpoint</th><th>Method</th><th>Success</th><th>Client Error</th><th>Server Error</th></tr>
+  <tr><td><code>/api/health</code></td><td>GET</td><td>200</td><td>—</td><td>500</td></tr>
+  <tr><td><code>/api/roster/analyze</code></td><td>POST</td><td>200</td><td>400 / 422</td><td>500</td></tr>
+  <tr><td><code>/api/financials/{ticker}</code></td><td>GET</td><td>200</td><td>404 / 422</td><td>502 / 500</td></tr>
+</table>
+<p>All responses must include <code>Content-Type: application/json</code> and <code>X-Request-ID: &lt;uuid&gt;</code>.</p>
+
+<h1>8. Coverage Targets</h1>
+<table>
+  <tr><th>Layer</th><th>Target</th></tr>
+  <tr><td>Service classes (<code>app/Services/</code>)</td><td>≥ 90% line coverage</td></tr>
+  <tr><td>Controllers (<code>app/Http/Controllers/</code>)</td><td>≥ 80% line coverage</td></tr>
+  <tr><td>Models (<code>app/Models/</code>)</td><td>≥ 70% line coverage</td></tr>
+  <tr><td>Overall</td><td>≥ 80% line coverage</td></tr>
+</table>
+<pre><code>make test-coverage   # HTML report → coverage/index.html</code></pre>
+
+<h1>9. HTTP Faking Rules</h1>
+<div class="warn-note">
+  <b>Rule:</b> Tests must <b>never</b> hit <code>data.sec.gov</code>. Always call <code>Http::fake()</code> in <code>setUp()</code> or at the top of the test method before the subject-under-test runs.
+</div>
+<pre><code>// Correct — isolated, deterministic
+Http::fake([
+    'data.sec.gov/submissions/*' => Http::response($this->edgarPayload(), 200),
+]);
+
+// Wrong — hits the real internet, breaks in CI
+// (no Http::fake call — DO NOT do this)</code></pre>
+
+<h1>10. CI/CD Integration</h1>
+<pre><code># GitHub Actions example
+- name: Run PHPUnit
+  run: docker compose exec -T app php artisan test --parallel
+
+- name: Upload coverage
+  uses: codecov/codecov-action@v4
+  with:
+    files: coverage/clover.xml</code></pre>
+
+<h1>11. Related Documents</h1>
+<table>
+  <tr><th>Document</th><th>Location</th></tr>
+  <tr><td>Master Test Plan</td><td><code>QA/test-plan.md</code></td></tr>
+  <tr><td>Happy Path Test Cases</td><td><code>QA/test-cases-happy-path.md</code></td></tr>
+  <tr><td>Database Testing Guide</td><td><code>QA/database-testing.html</code></td></tr>
+  <tr><td>PHPUnit config</td><td><code>AP.Hackathon.BE/phpunit.xml</code></td></tr>
+  <tr><td>Makefile commands</td><td><code>AP.Hackathon.BE/Makefile</code></td></tr>
+</table>
+
+</div><!-- /content -->
+</body>
+</html>
