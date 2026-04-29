@@ -139,7 +139,7 @@ export default function Step1Roster({ roster, ai, onLoad, onReset, onAI, onNext 
                   onClick={() => pasteRef.current?.focus()}
                 >
                   <div style={{ padding: '52px 24px', textAlign: 'center', pointerEvents: 'none' }}>
-                    <div style={{ fontSize: 38, marginBottom: 12 }}>📋</div>
+                    <div style={{ fontSize: 38, marginBottom: 12 }}></div>
                     <div style={{ fontSize: 15, fontWeight: 600, color: '#333', marginBottom: 6 }}>Click here, then paste your data</div>
                     <div style={{ fontSize: 12, color: '#888' }}>Select the rows in your Excel file (including the header row), copy with Ctrl+C, then press Ctrl+V here</div>
                     <div style={{ fontSize: 11, color: '#bbb', marginTop: 10 }}>Expected columns: Job Function · Seniority · Country · Fully Loaded Cost</div>
