@@ -90,7 +90,16 @@ Shows:
   - SG&A efficiency gap: SG&A > 15% of revenue → benchmark to 10%, show $ gap
   - R&D productivity: R&D > 8% of revenue + high rev/employee → flag productivity question
   - Rev/employee gap: < $100K/head → model path to benchmark headcount
+- **📊 Export to PPT button** (amber/highlighted, prominently placed in the comparison banner): generates a 6-slide PowerPoint deck using PptxGenJS (CDN, no install). Slides:
+  1. Cover — company name, FY, headcount, AP branding, date
+  2. Dataset Overview — roster summary (employees, countries, spend, senior ratio) ↔ financials (revenue, EBITDA, margin, source)
+  3. Integrated Key Metrics — Revenue per Employee / Labor as % of Revenue / EBITDA Margin in large-format KPI cards
+  4. Workforce Composition — horizontal bar charts (text-based) for function breakdown and seniority distribution
+  5. Value Creation Opportunities — amber-themed cards for each computed lever with titles, details, and $ impact
+  6. Key Insights — top function by headcount/spend, largest seniority band, geographic footprint
 - **AI Analyst Narrative card**: cross-dataset interpretation of revenue efficiency, labor ratio, EBITDA context. Includes 5 clickable pre-made questions.
+
+**Technical note:** Add PptxGenJS via CDN: `https://cdn.jsdelivr.net/npm/pptxgenjs@3.12.0/dist/pptxgen.bundle.js`
 
 ### Navigation
 **Step-by-step guided flow** (not tabs): Show a progress bar with steps 1 → 2 → 3. Each step shows numbered circles, checkmarks when complete, and "needs data" badges when locked. Navigation buttons at the bottom of each step guide practitioners forward and back. Step 3 is locked until both datasets are loaded.
