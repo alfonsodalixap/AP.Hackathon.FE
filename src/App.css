@@ -1,12 +1,1 @@
-.app {
-  text-align: center;
-}
-
-.app h1 {
-  font-size: 2rem;
-  margin-bottom: 1rem;
-}
-
-.app p {
-  color: #666;
-}
+/* intentionally empty — styles live in index.css */
