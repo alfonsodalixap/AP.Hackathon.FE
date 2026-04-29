@@ -613,10 +613,23 @@
       <!-- Integrated view -->
       <div x-show="roster.loaded && financials.loaded">
 
-        <div style="display:flex;align-items:baseline;gap:12px;margin-bottom:16px;">
-          <div style="font-size:18px;font-weight:700;" x-text="financials.data?.company"></div>
-          <div style="font-size:13px;color:#aaa;">
-            <span x-text="roster.data?.total_headcount?.toLocaleString()"></span> employees · FY<span x-text="financials.data?.fiscal_year"></span>
+        <!-- Comparison banner -->
+        <div style="background:#fff;border-radius:8px;padding:16px 20px;margin-bottom:16px;box-shadow:0 1px 3px rgba(0,0,0,.08);display:flex;align-items:center;gap:0;border-left:4px solid #498E2B;">
+          <div style="flex:1;">
+            <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#aaa;margin-bottom:4px;">Roster</div>
+            <div style="font-size:15px;font-weight:700;color:#212529;" x-text="roster.fileName"></div>
+            <div style="font-size:12px;color:#6c757d;margin-top:2px;"><span x-text="roster.data?.total_headcount?.toLocaleString()"></span> employees · <span x-text="roster.data?.num_countries"></span> countries</div>
+          </div>
+          <div style="padding:0 24px;font-size:22px;color:#dee2e6;font-weight:300;">↔</div>
+          <div style="flex:1;">
+            <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#aaa;margin-bottom:4px;">Financials</div>
+            <div style="font-size:15px;font-weight:700;color:#212529;" x-text="financials.data?.company"></div>
+            <div style="font-size:12px;color:#6c757d;margin-top:2px;">FY<span x-text="financials.data?.fiscal_year"></span> · <span x-text="financials.data?.source"></span></div>
+          </div>
+          <div style="margin-left:auto;padding-left:24px;border-left:1px solid #f0f0f0;">
+            <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#aaa;margin-bottom:4px;">Revenue</div>
+            <div style="font-size:15px;font-weight:700;color:#498E2B;" x-text="fmt(financials.data?.total_revenue)"></div>
+            <div style="font-size:12px;color:#6c757d;margin-top:2px;">EBITDA <span x-text="ebitdaMargin()"></span></div>
           </div>
         </div>
 
@@ -625,11 +638,12 @@
           <div class="metric-ratio">
             <div class="metric-label">Revenue per Employee</div>
             <div class="metric-value" x-text="fmt(revenuePerEmployee())"></div>
+            <div class="metric-sub" style="color:rgba(255,255,255,.7);" x-text="financials.data?.company + ' FY' + financials.data?.fiscal_year"></div>
           </div>
           <div class="metric accent">
             <div class="metric-label">Labor as % of Revenue</div>
             <div class="metric-value" x-text="laborPct()"></div>
-            <div class="metric-sub">total labor spend / revenue</div>
+            <div class="metric-sub"><span x-text="fmt(roster.data?.total_labor_spend)"></span> labor / <span x-text="fmt(financials.data?.total_revenue)"></span> revenue</div>
           </div>
           <div class="metric">
             <div class="metric-label">EBITDA Margin</div>
@@ -674,6 +688,23 @@
               <div class="insight-value" x-text="Object.keys(roster.data?.by_country || {}).length + ' countries'"></div>
               <div class="insight-sub" x-text="'Largest: ' + topCountry()?.name + ' (' + topCountry()?.pct + '%)'"></div>
             </div>
+          </div>
+        </div>
+
+        <!-- Opportunities card -->
+        <div class="card">
+          <div class="card-title" style="color:#d97706;">⚡ Potential Value Creation Opportunities</div>
+          <div style="display:flex;flex-direction:column;gap:10px;">
+            <template x-for="opp in opportunities()" :key="opp.title">
+              <div style="display:flex;gap:14px;padding:12px 14px;border-radius:6px;background:#fffbf0;border:1px solid #fde68a;">
+                <div style="flex:0 0 auto;width:8px;height:8px;border-radius:50%;background:#d97706;margin-top:5px;"></div>
+                <div style="flex:1;">
+                  <div style="font-size:13px;font-weight:700;color:#92400e;" x-text="opp.title"></div>
+                  <div style="font-size:12px;color:#78350f;margin-top:3px;line-height:1.5;" x-text="opp.detail"></div>
+                  <div x-show="opp.impact" style="margin-top:5px;font-size:11px;font-weight:700;color:#d97706;background:#fef3c7;display:inline-block;padding:2px 8px;border-radius:10px;" x-text="opp.impact"></div>
+                </div>
+              </div>
+            </template>
           </div>
         </div>
 
@@ -1303,7 +1334,11 @@
       },
       laborPct() {
         const labor = this.roster.data?.total_labor_spend, rev = this.financials.data?.total_revenue;
-        return (labor && rev) ? Math.round(labor/rev*100) + '%' : 'N/A';
+        if (!labor || !rev) return 'N/A';
+        const pct = labor / rev * 100;
+        if (pct >= 1) return Math.round(pct) + '%';
+        if (pct >= 0.1) return pct.toFixed(1) + '%';
+        return pct.toFixed(2) + '%';
       },
       ebitdaMargin() {
         const e = this.financials.data?.ebitda, rev = this.financials.data?.total_revenue;
@@ -1329,6 +1364,105 @@
         const [name,count] = Object.entries(this.roster.data.by_country).sort((a,b)=>b[1]-a[1])[0]||[];
         return name ? { name, pct: Math.round(count/this.roster.data.total_headcount*100) } : null;
       },
+      opportunities() {
+        const rd = this.roster.data, fd = this.financials.data;
+        if (!rd || !fd) return [];
+        const opps = [];
+        const rev = fd.total_revenue, eb = fd.ebitda;
+        const labor = rd.total_labor_spend, hc = rd.total_headcount;
+        const topFn = this.topFn(), topFnSpend = this.topFnSpend();
+        const avgCost = rd.avg_cost_per_employee;
+
+        // 1. Senior layer — if VP+ ratio > 20%, model a 15% reduction
+        if (rd.senior_ratio > 20) {
+          const seniorSpend = (rd.cost_concentration / 100) * labor;
+          const saving = Math.round(seniorSpend * 0.15);
+          opps.push({
+            title: `Senior layer rationalization (${rd.senior_ratio}% VP+ of workforce)`,
+            detail: `A ${rd.senior_ratio}% VP/Director ratio is above typical benchmarks (10–15% for most companies). A 15% reduction in senior headcount could free up significant spend without touching delivery capacity.`,
+            impact: `Est. savings: ${this.fmt(saving)} / year`,
+          });
+        }
+
+        // 2. Top-function concentration — if >35% of headcount in one function
+        if (topFn && topFn.pct > 35) {
+          const benchmarkPct = 25;
+          const excess = topFn.count - Math.round(hc * benchmarkPct / 100);
+          const saving = excess * avgCost;
+          opps.push({
+            title: `${topFn.name} function concentration (${topFn.pct}% of headcount)`,
+            detail: `${topFn.name} dominates the org at ${topFn.pct}% of staff — well above the typical 20–25% ceiling for a single function. Benchmarking against peers could reveal whether this reflects strategic over-investment or structural bloat.`,
+            impact: excess > 0 ? `Rightsizing to 25% = ~${excess} roles, ${this.fmt(saving)} in potential savings` : null,
+          });
+        }
+
+        // 3. Cost concentration — top quartile captures >60%
+        if (rd.cost_concentration > 60) {
+          const topQCost = (rd.cost_concentration / 100) * labor;
+          opps.push({
+            title: `Top-quartile compensation review (${rd.cost_concentration}% of spend in top 25% of earners)`,
+            detail: `The top 25% of earners account for ${rd.cost_concentration}% of total labor spend — a compressed pay pyramid where a small number of senior roles drive outsized cost. Review compensation benchmarks against industry and probe in management interviews.`,
+            impact: `Top-quartile envelope: ${this.fmt(topQCost)}`,
+          });
+        }
+
+        // 4. Geographic arbitrage — if US share is >60% and multi-country
+        const usCost = rd.cost_by_country?.['United States'] || rd.cost_by_country?.['US'] || 0;
+        const usHc = rd.by_country?.['United States'] || rd.by_country?.['US'] || 0;
+        if (rd.num_countries > 1 && usCost > labor * 0.6 && usHc > 0) {
+          const arbitrageSaving = Math.round(usCost * 0.2);
+          opps.push({
+            title: `Geographic labor arbitrage (${Math.round(usCost/labor*100)}% of spend in US)`,
+            detail: `US-based talent is significantly more expensive than equivalent roles in the existing international locations. Shifting 15–20% of US roles to lower-cost geographies where the company already operates could materially reduce the cost base.`,
+            impact: `20% shift could yield ~${this.fmt(arbitrageSaving)} in annual savings`,
+          });
+        }
+
+        // 5. SG&A efficiency — if SG&A > 15% of revenue
+        const sga = fd.expense_breakdown?.selling_general_admin;
+        if (sga && rev && sga / rev > 0.15) {
+          const sgaPct = Math.round(sga / rev * 100);
+          const benchmark = Math.round(rev * 0.10);
+          const gap = sga - benchmark;
+          opps.push({
+            title: `SG&A efficiency gap (${sgaPct}% of revenue vs. ~10% benchmark)`,
+            detail: `SG&A at ${sgaPct}% of revenue exceeds the ~10% benchmark for companies at this scale. Cross-referencing the roster's overhead functions (HR, Finance, Legal) against this spend line can identify whether the inefficiency is headcount-driven or vendor/infrastructure cost.`,
+            impact: `Closing to 10% benchmark: ${this.fmt(gap)} in potential reduction`,
+          });
+        }
+
+        // 6. R&D leverage — if R&D > 10% and rev/emp is very high
+        const rd_exp = fd.expense_breakdown?.research_and_development;
+        const revPerEmp = this.revenuePerEmployee();
+        if (rd_exp && rev && rd_exp / rev > 0.08 && revPerEmp > 300000) {
+          opps.push({
+            title: `R&D productivity assessment (${Math.round(rd_exp/rev*100)}% of revenue)`,
+            detail: `At ${this.fmt(rd_exp)} in R&D spend and ${this.fmt(revPerEmp)} revenue per employee, the question is whether R&D investment is translating to product differentiation and pricing power. Benchmarking output metrics (product launches, patents, NPS) against this spend level is a key diligence workstream.`,
+            impact: null,
+          });
+        }
+
+        // 7. Headcount vs revenue scale — if rev/emp is very low (labor-intensive)
+        if (revPerEmp && revPerEmp < 100000) {
+          opps.push({
+            title: `Revenue per employee gap vs. peers (${this.fmt(revPerEmp)} per head)`,
+            detail: `At ${this.fmt(revPerEmp)} revenue per employee, this workforce is significantly less productive than industry averages for comparable businesses ($150K–$300K+). Automation, process re-engineering, or headcount right-sizing are likely levers to close the gap.`,
+            impact: `Closing to $200K/head implies a path to ${this.fmt(Math.round(rev / 200000))} optimal headcount vs. current ${hc.toLocaleString()}`,
+          });
+        }
+
+        // Default if nothing fires
+        if (opps.length === 0) {
+          opps.push({
+            title: 'Functional headcount benchmarking',
+            detail: `Load a larger roster sample to generate data-driven opportunities. With the current dataset, compare ${topFn?.name || 'top function'} headcount ratios against direct peers to identify structural inefficiencies.`,
+            impact: null,
+          });
+        }
+
+        return opps;
+      },
+
       pct(val, total) { return (!val||!total) ? 0 : Math.min(100, Math.round(val/total*100)); },
       fmt(val) {
         if (val === null || val === undefined || isNaN(val)) return 'N/A';

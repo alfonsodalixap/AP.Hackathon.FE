@@ -77,11 +77,20 @@ Export to PDF button for financial summary.
 Only accessible when both datasets are loaded. On first access, show a **period mismatch warning modal** reminding practitioners to confirm both datasets cover comparable timeframes (heightened warning if fiscal year is >1 year behind current date).
 
 Shows:
-- Ratio KPIs: Revenue per Employee (highlighted), Labor Spend as % of Revenue, EBITDA Margin
+- **Comparison banner** (always visible at top): Roster name / headcount / countries ↔ Company name / FY / revenue / EBITDA margin. Practitioners must always see exactly what they are cross-referencing.
+- Ratio KPIs: Revenue per Employee, Labor Spend as % of Revenue (show decimal precision when < 1% — never display plain 0%), EBITDA Margin
 - Seniority Pyramid (horizontal bar chart, sorted by hierarchy, opacity increases toward junior levels)
 - Labor Spend by Seniority (horizontal bar chart)
 - Key Insights grid: Top Function by Headcount, Top Function by Spend, Largest Seniority Band, Geographic Footprint
-- **AI Analyst Narrative card**: cross-dataset interpretation of revenue efficiency, labor ratio, EBITDA context, and — critically — **a "Potential Improvement Areas" section** that surfaces specific restructuring levers (e.g., senior-layer rationalization, top-quartile compensation review, geographic consolidation, function rebalancing). Includes 5 clickable pre-made questions.
+- **⚡ Value Creation Opportunities card** — data-driven levers computed from the loaded data (not generic bullets). Compute and display only those that are triggered by the data:
+  - Senior layer rationalization: VP+ > 20% of headcount → model 15% reduction, show $ savings
+  - Top-function concentration: one function > 35% of headcount → benchmark to 25%, show excess roles + savings
+  - Top-quartile compensation review: top 25% earners > 60% of labor spend → flag envelope size
+  - Geographic labor arbitrage: US spend > 60% of labor + multi-country → estimate 20% shift savings
+  - SG&A efficiency gap: SG&A > 15% of revenue → benchmark to 10%, show $ gap
+  - R&D productivity: R&D > 8% of revenue + high rev/employee → flag productivity question
+  - Rev/employee gap: < $100K/head → model path to benchmark headcount
+- **AI Analyst Narrative card**: cross-dataset interpretation of revenue efficiency, labor ratio, EBITDA context. Includes 5 clickable pre-made questions.
 
 ### Navigation
 **Step-by-step guided flow** (not tabs): Show a progress bar with steps 1 → 2 → 3. Each step shows numbered circles, checkmarks when complete, and "needs data" badges when locked. Navigation buttons at the bottom of each step guide practitioners forward and back. Step 3 is locked until both datasets are loaded.
