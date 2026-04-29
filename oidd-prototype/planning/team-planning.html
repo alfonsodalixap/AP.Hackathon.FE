@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<style>
+  body {
+    font-family: Aptos, Arial, Helvetica, sans-serif;
+    font-size: 12pt;
+    color: #111;
+    max-width: 900px;
+    margin: 0;
+    padding: 0 0 40px 0;
+    line-height: 1.5;
+    background: #fff;
+  }
+
+  /* Header */
+  .header {
+    background: #222;
+    padding: 18px 28px 14px;
+    border-bottom: 4px solid #498E2B;
+  }
+  .header-title { color: #fff; font-size: 15pt; font-weight: 700; margin: 0 0 4px 0; }
+  .header-meta { color: #aaa; font-size: 10pt; }
+  .header-meta strong { color: #5CB335; }
+
+  .section { padding: 22px 28px 0; }
+  .section-title {
+    font-size: 9pt; font-weight: 700; text-transform: uppercase;
+    letter-spacing: .08em; color: #888; margin: 0 0 14px 0;
+    padding-bottom: 6px; border-bottom: 1px solid #eee;
+  }
+
+  /* Role labels */
+  .lbl { display: inline-block; font-size: 8pt; font-weight: 700; padding: 1px 7px; border-radius: 3px; text-transform: uppercase; letter-spacing: .04em; }
+  .pm  { background: #F0FFF4; color: #166534; }
+  .be  { background: #EEF5FB; color: #0369A3; }
+  .fe  { background: #FFF1F2; color: #BE185D; }
+  .qa  { background: #FFF7ED; color: #C2410C; }
+  .ux  { background: #F5F0FF; color: #6B38C4; }
+  .all { background: #F0FFF4; color: #166534; }
+
+  /* Gantt */
+  .gantt { width: 100%; border-collapse: collapse; font-size: 9.5pt; }
+  .gantt thead th {
+    padding: 7px 10px; background: #f4f4f4; border-bottom: 2px solid #ddd;
+    font-size: 8.5pt; text-transform: uppercase; letter-spacing: .05em; color: #666;
+    text-align: left;
+  }
+  .gantt thead th.time-col { width: 90px; }
+  .gantt tbody tr { border-bottom: 1px solid #f0f0f0; }
+  .gantt tbody tr:hover { background: #fafafa; }
+  .gantt td { padding: 8px 10px; vertical-align: top; }
+  .gantt td.time { font-weight: 700; color: #498E2B; white-space: nowrap; font-size: 9.5pt; }
+  .gantt td.milestone { background: #f0f9eb; font-weight: 700; color: #166534; }
+  .gantt td.milestone-label { background: #f0f9eb; color: #166534; font-weight: 700; font-size: 9pt; padding-left: 14px; }
+
+  .cell-task { color: #333; margin-bottom: 3px; }
+  .cell-check { color: #166534; font-size: 9pt; }
+  .cell-empty { color: #ddd; }
+  .cell-wait { color: #aaa; font-style: italic; font-size: 9pt; }
+
+  code {
+    font-family: Consolas, monospace; font-size: 8.5pt;
+    background: #f4f4f4; padding: 1px 5px; border-radius: 3px;
+  }
+
+  /* Milestone row */
+  .ms-row td { background: #f0f9eb !important; border-top: 2px solid #5CB335 !important; }
+  .ms-label { font-size: 9pt; font-weight: 700; color: #166534; }
+
+  /* Risk table */
+  .risk-table { width: 100%; border-collapse: collapse; font-size: 9.5pt; }
+  .risk-table th {
+    padding: 7px 10px; background: #f4f4f4; border-bottom: 2px solid #ddd;
+    font-size: 8.5pt; text-transform: uppercase; letter-spacing: .05em; color: #666; text-align: left;
+  }
+  .risk-table td { padding: 8px 10px; border-bottom: 1px solid #f0f0f0; vertical-align: top; }
+  .risk-high { color: #b91c1c; font-weight: 700; }
+  .risk-med  { color: #b45309; font-weight: 700; }
+  .risk-low  { color: #166534; font-weight: 700; }
+
+  /* Decisions */
+  .decision-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .decision-card {
+    border: 1px solid #e0e0e0; border-radius: 6px; padding: 12px 14px;
+    border-left: 3px solid #498E2B;
+  }
+  .decision-q { font-size: 9pt; color: #888; margin-bottom: 3px; font-weight: 700; text-transform: uppercase; letter-spacing: .04em; }
+  .decision-a { font-size: 10pt; color: #111; font-weight: 600; }
+
+  /* EOD tracker */
+  .eod-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .eod-card {
+    border: 1px solid #e0e0e0; border-radius: 6px; padding: 11px 13px;
+  }
+  .eod-num { font-size: 9pt; color: #aaa; font-weight: 700; }
+  .eod-q { font-size: 9.5pt; color: #333; }
+  .eod-track { font-size: 8.5pt; color: #0369A3; margin-top: 4px; }
+
+  .footer {
+    margin: 28px 28px 0;
+    padding-top: 12px;
+    border-top: 1px solid #eee;
+    font-size: 9pt; color: #aaa;
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-title">Team 2 — Session Planning</div>
+  <div class="header-meta">April 30, 2026 &nbsp;·&nbsp; <strong>Outside-In Diligence Tool</strong> &nbsp;·&nbsp; Prompt First approach &nbsp;·&nbsp; ~6hr session</div>
+</div>
+
+<!-- SCHEDULE -->
+<div class="section">
+  <div class="section-title">Session timeline — parallel tracks</div>
+  <table class="gantt">
+    <thead>
+      <tr>
+        <th class="time-col">Time</th>
+        <th><span class="lbl pm">Jose — PM</span></th>
+        <th><span class="lbl be">Dehyvis — BE</span></th>
+        <th><span class="lbl fe">Alfonso + Joaquin — FE</span></th>
+        <th><span class="lbl qa">Alejandro — QA</span></th>
+        <th><span class="lbl ux">Lucas — UX</span></th>
+      </tr>
+    </thead>
+    <tbody>
+
+      <!-- T+0 -->
+      <tr>
+        <td class="time">T + 0</td>
+        <td>
+          <div class="cell-task">Send BE files (4 files) via Teams DM to Dehyvis</div>
+          <div class="cell-task">Open HTML prototype in Chrome</div>
+          <div class="cell-task">Walk prototype with Lucas</div>
+        </td>
+        <td>
+          <div class="cell-task">Receive 4 BE files</div>
+          <div class="cell-task">Create venv + <code>pip install</code></div>
+        </td>
+        <td>
+          <div class="cell-task">Pull FE repo</div>
+          <div class="cell-task">Run npm install (+ 5 new packages)</div>
+          <div class="cell-task">Review API contract</div>
+        </td>
+        <td><div class="cell-wait">Waiting for BE</div></td>
+        <td>
+          <div class="cell-task">Review HTML prototype</div>
+          <div class="cell-task">Flag UX gaps before React build</div>
+        </td>
+      </tr>
+
+      <!-- T+30 — Milestone: BE online -->
+      <tr class="ms-row">
+        <td class="time">T + 30</td>
+        <td colspan="5"><span class="ms-label">🟢 Milestone: BE online</span> &nbsp; Dehyvis runs <code>uvicorn main:app --reload --port 8000</code> · Alejandro verifies <code>localhost:8000/docs</code></td>
+      </tr>
+
+      <!-- T+30 work -->
+      <tr>
+        <td class="time"></td>
+        <td>
+          <div class="cell-task">Check-in with each track</div>
+          <div class="cell-task">Log: first working artifact time</div>
+          <div class="cell-task">Answer Adriana's business questions</div>
+        </td>
+        <td>
+          <div class="cell-task">Test all 3 endpoints via Swagger</div>
+          <div class="cell-task">Fix any startup issues</div>
+          <div class="cell-check">✓ BE stable → hand off to FE</div>
+        </td>
+        <td>
+          <div class="cell-task">FE shell complete (3 tabs, routing)</div>
+          <div class="cell-task">Alfonso: health ping to BE</div>
+          <div class="cell-task">Joaquin: starts Roster upload component</div>
+        </td>
+        <td>
+          <div class="cell-task">Test BE endpoints via Swagger UI</div>
+          <div class="cell-task">Document any discrepancies</div>
+        </td>
+        <td>
+          <div class="cell-task">Define final UX patterns</div>
+          <div class="cell-task">Sketch loading + error states</div>
+        </td>
+      </tr>
+
+      <!-- T+90 — Milestone: Roster done -->
+      <tr class="ms-row">
+        <td class="time">T + 90</td>
+        <td colspan="5"><span class="ms-label">🟢 Milestone: Roster screen working</span> &nbsp; Upload real Excel → correct headcount + spend numbers appear in FE</td>
+      </tr>
+
+      <!-- T+90 work -->
+      <tr>
+        <td class="time"></td>
+        <td>
+          <div class="cell-task">Demo Roster screen to Adriana</div>
+          <div class="cell-task">Log: iteration count so far</div>
+          <div class="cell-task">Collect feedback → prioritize</div>
+        </td>
+        <td>
+          <div class="cell-task">Fix any BE parsing issues from real Excel</div>
+          <div class="cell-task">Support FE integration questions</div>
+        </td>
+        <td>
+          <div class="cell-task">Joaquin: polish Roster charts + error states</div>
+          <div class="cell-task">Alfonso: build Financials screen</div>
+        </td>
+        <td>
+          <div class="cell-task">QA Roster screen end-to-end</div>
+          <div class="cell-task">Test with bad Excel (wrong columns)</div>
+        </td>
+        <td>
+          <div class="cell-task">UX review of Roster charts</div>
+          <div class="cell-task">Check label clarity + color consistency</div>
+        </td>
+      </tr>
+
+      <!-- T+2.5h — Milestone: Financials done -->
+      <tr class="ms-row">
+        <td class="time">T + 2.5h</td>
+        <td colspan="5"><span class="ms-label">🟢 Milestone: Financials screen working</span> &nbsp; Search AAPL → Revenue / EBITDA / Expenses from SEC EDGAR appear</td>
+      </tr>
+
+      <!-- T+2.5h work -->
+      <tr>
+        <td class="time"></td>
+        <td>
+          <div class="cell-task">Demo Financials screen to Adriana</div>
+          <div class="cell-task">Confirm financial data accuracy</div>
+          <div class="cell-task">Log: any rework moments</div>
+        </td>
+        <td>
+          <div class="cell-task">Any BE fixes from FE feedback</div>
+          <div class="cell-task">Verify EBITDA approximation is acceptable</div>
+        </td>
+        <td>
+          <div class="cell-task">Alfonso + Joaquin: build Integrated screen together</div>
+          <div class="cell-task">Seniority pyramid + ratio metrics</div>
+        </td>
+        <td>
+          <div class="cell-task">QA Financials (multiple tickers)</div>
+          <div class="cell-task">Test slow SEC response + error states</div>
+        </td>
+        <td>
+          <div class="cell-task">UX review of Financials layout</div>
+          <div class="cell-task">Spot-check data labels vs. SEC source</div>
+        </td>
+      </tr>
+
+      <!-- T+4h — Milestone: Integrated done -->
+      <tr class="ms-row">
+        <td class="time">T + 4h</td>
+        <td colspan="5"><span class="ms-label">🟢 Milestone: Integrated screen working</span> &nbsp; Both datasets loaded → seniority pyramid + revenue per employee + labor % render correctly</td>
+      </tr>
+
+      <!-- T+4h work -->
+      <tr>
+        <td class="time"></td>
+        <td>
+          <div class="cell-task">Full end-to-end demo walkthrough</div>
+          <div class="cell-task">Adriana acceptance check</div>
+          <div class="cell-task">Triage final polish list</div>
+        </td>
+        <td>
+          <div class="cell-task">Final BE fixes</div>
+          <div class="cell-task">Performance check (large Excel files)</div>
+        </td>
+        <td>
+          <div class="cell-task">Polish pass: number formatting, empty states</div>
+          <div class="cell-task">Fix any layout issues</div>
+        </td>
+        <td>
+          <div class="cell-task">Full QA on all 3 screens</div>
+          <div class="cell-task">Document bugs + severity</div>
+        </td>
+        <td>
+          <div class="cell-task">Final UX review</div>
+          <div class="cell-task">Verify AP design system consistency</div>
+        </td>
+      </tr>
+
+      <!-- T+5h — EOD -->
+      <tr class="ms-row">
+        <td class="time">T + 5h</td>
+        <td colspan="5"><span class="ms-label">📝 End of session — fill in Team 2 Coda page</span> &nbsp; Answer the 8 questions + paste key prompts used</td>
+      </tr>
+
+      <!-- EOD row -->
+      <tr>
+        <td class="time"></td>
+        <td>
+          <div class="cell-task">Lead team retro</div>
+          <div class="cell-task">Write Coda answers</div>
+          <div class="cell-task">Collect best prompts from team</div>
+        </td>
+        <td><div class="cell-task">Write answers for BE perspective</div></td>
+        <td><div class="cell-task">Write answers for FE perspective</div></td>
+        <td><div class="cell-task">Write answers for QA perspective</div></td>
+        <td><div class="cell-task">Write answers for UX/design perspective</div></td>
+      </tr>
+
+    </tbody>
+  </table>
+</div>
+
+<!-- KEY DECISIONS -->
+<div class="section" style="margin-top:24px;">
+  <div class="section-title">Key decisions — already made</div>
+  <div class="decision-grid">
+    <div class="decision-card">
+      <div class="decision-q">BE language</div>
+      <div class="decision-a">Python + FastAPI</div>
+      <div style="font-size:9pt;color:#666;margin-top:3px;">Best pandas support for Excel; auto-generates Swagger docs for QA</div>
+    </div>
+    <div class="decision-card">
+      <div class="decision-q">Financial data source</div>
+      <div class="decision-a">SEC EDGAR public API</div>
+      <div style="font-size:9pt;color:#666;margin-top:3px;">No API key needed; 10-K data from <code>data.sec.gov</code></div>
+    </div>
+    <div class="decision-card">
+      <div class="decision-q">Excel parsing</div>
+      <div class="decision-a">BE (pandas + openpyxl)</div>
+      <div style="font-size:9pt;color:#666;margin-top:3px;">Fuzzy column matching handles real-world naming variations</div>
+    </div>
+    <div class="decision-card">
+      <div class="decision-q">FE stack</div>
+      <div class="decision-a">React 19 + Recharts + React Query</div>
+      <div style="font-size:9pt;color:#666;margin-top:3px;">Alfonso's base already set up; @alixpartners/ui-components for AP design</div>
+    </div>
+    <div class="decision-card">
+      <div class="decision-q">EBITDA calculation</div>
+      <div class="decision-a">Operating Income + D&A</div>
+      <div style="font-size:9pt;color:#666;margin-top:3px;">SEC EDGAR doesn't report EBITDA directly; this approximation is standard</div>
+    </div>
+    <div class="decision-card">
+      <div class="decision-q">Prototype approach</div>
+      <div class="decision-a">HTML prototype first, React after</div>
+      <div style="font-size:9pt;color:#666;margin-top:3px;">Validates UX assumptions before React build; faster to iterate</div>
+    </div>
+  </div>
+</div>
+
+<!-- RISKS -->
+<div class="section" style="margin-top:24px;">
+  <div class="section-title">Risk register</div>
+  <table class="risk-table">
+    <thead><tr><th>Risk</th><th>Likelihood</th><th>Impact</th><th>Mitigation</th></tr></thead>
+    <tbody>
+      <tr>
+        <td><strong>Excel columns don't match expected names</strong><br><span style="font-size:9pt;color:#666;">Real file uses different naming than assumed</span></td>
+        <td class="risk-med">Medium</td>
+        <td class="risk-high">High</td>
+        <td>BE uses fuzzy case-insensitive matching. If it fails, BE returns exact column names found → FE shows human-readable error with what was received.</td>
+      </tr>
+      <tr>
+        <td><strong>SEC EDGAR slow or unavailable</strong><br><span style="font-size:9pt;color:#666;">Large company facts JSON can be 10–50MB</span></td>
+        <td class="risk-med">Medium</td>
+        <td class="risk-med">Medium</td>
+        <td>BE returns 502 with message "use manual entry." FE shows clear error + estimated wait time. Demo with AAPL (known to work).</td>
+      </tr>
+      <tr>
+        <td><strong>CORS issues between FE and BE</strong><br><span style="font-size:9pt;color:#666;">FE dev server URL not in BE allow-list</span></td>
+        <td class="risk-low">Low</td>
+        <td class="risk-high">High</td>
+        <td>BE .env allows localhost:5173 and :5174 by default. If Vite uses a different port, update ALLOWED_ORIGINS in .env and restart uvicorn.</td>
+      </tr>
+      <tr>
+        <td><strong>Time overrun on Integrated screen</strong><br><span style="font-size:9pt;color:#666;">Seniority sorting logic is tricky without known labels</span></td>
+        <td class="risk-med">Medium</td>
+        <td class="risk-low">Low</td>
+        <td>HTML prototype has working seniority sort logic (copy-paste ready). Fallback: show flat bar chart sorted by count if pyramid logic is delayed.</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- EOD TRACKER -->
+<div class="section" style="margin-top:24px;">
+  <div class="section-title">End-of-day tracker — what to capture as you go</div>
+  <div class="eod-grid">
+    <div class="eod-card">
+      <div class="eod-num">Q1</div>
+      <div class="eod-q">Time to first usable result</div>
+      <div class="eod-track">📍 Track: note when each milestone is hit relative to T+0</div>
+    </div>
+    <div class="eod-card">
+      <div class="eod-num">Q2</div>
+      <div class="eod-q">Number of iterations (design / code / QA)</div>
+      <div class="eod-track">📍 Track: count prompts sent to Claude, count how many screen revisions</div>
+    </div>
+    <div class="eod-card">
+      <div class="eod-num">Q3</div>
+      <div class="eod-q">Confidence in quality (code / UX / QA)</div>
+      <div class="eod-track">📍 Track: note any "I wouldn't ship this" moments and why</div>
+    </div>
+    <div class="eod-card">
+      <div class="eod-num">Q4</div>
+      <div class="eod-q">Rework — did you start from scratch?</div>
+      <div class="eod-track">📍 Track: note any throwaway work and what triggered it</div>
+    </div>
+    <div class="eod-card">
+      <div class="eod-num">Q5</div>
+      <div class="eod-q">Design–Development relationship</div>
+      <div class="eod-track">📍 Track: where were handoffs smooth? where did they break down?</div>
+    </div>
+    <div class="eod-card">
+      <div class="eod-num">Q6</div>
+      <div class="eod-q">Team confidence in the output</div>
+      <div class="eod-track">📍 Track: would each person demo this to a client? yes/no and why</div>
+    </div>
+    <div class="eod-card">
+      <div class="eod-num">Q7</div>
+      <div class="eod-q">Tips and best practices learned</div>
+      <div class="eod-track">📍 Track: what prompts worked especially well? what backfired?</div>
+    </div>
+    <div class="eod-card">
+      <div class="eod-num">Q8</div>
+      <div class="eod-q">Main gaps and trouble spots</div>
+      <div class="eod-track">📍 Track: what would you do differently with one more hour?</div>
+    </div>
+  </div>
+</div>
+
+<div class="footer">
+  Team 2 · Outside-In Due Diligence · April 30, 2026 · Jose Prendergast (PM)
+</div>
+
+</body>
+</html>
