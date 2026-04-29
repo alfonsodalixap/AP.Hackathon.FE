@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { Button, Spinner } from '@alixpartners/ui-components';
 import type { RosterData, FinancialData, AIState } from '../types';
 import { fmt, laborPctStr, ebitdaMarginStr } from '../utils/format';
 import { sortBySeniority } from '../utils/seniority';
@@ -205,13 +206,15 @@ export default function Step3Integrated({ roster, financials, ai, onAI, onBack }
             <div style={{ fontSize: 15, fontWeight: 700, color: '#498E2B' }}>{fmt(fd.total_revenue)}</div>
             <div style={{ fontSize: 12, color: '#6c757d', marginTop: 2 }}>EBITDA {ebitdaMargin}</div>
           </div>
-          <button
+          <Button
+            type="primary"
             onClick={exportToPPT}
             disabled={pptExporting}
-            style={{ background: '#d97706', color: '#fff', border: 'none', borderRadius: 5, padding: '8px 16px', fontSize: 12, fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 6, boxShadow: '0 2px 6px rgba(217,119,6,.35)' }}
+            icon="ap-icon-file-ppt"
+            iconPosition="left"
           >
-            {pptExporting ? <><span className="spinner" style={{ borderTopColor: '#fff', borderColor: 'rgba(255,255,255,.3)' }} /> Building…</> : '📊 Export to PPT'}
-          </button>
+            {pptExporting ? <><Spinner size="sm" color="white" /> Building…</> : 'Export to PPT'}
+          </Button>
         </div>
       </div>
 
@@ -303,7 +306,9 @@ export default function Step3Integrated({ roster, financials, ai, onAI, onBack }
       />
 
       <div className="step-nav">
-        <button className="btn btn-outline" onClick={onBack}>← Financial Data</button>
+        <Button type="secondary" onClick={onBack} icon="ap-icon-previous" iconPosition="left">
+          Financial Data
+        </Button>
         <span />
       </div>
     </div>

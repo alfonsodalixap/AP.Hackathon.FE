@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { Button, Input, TabNavigation, Tab, Banner, Spinner } from '@alixpartners/ui-components';
 import type { FinancialData, ManualFinancials } from '../types';
 import { fmt, pct, parseMonetary } from '../utils/format';
 import { fetchFromEDGAR, DEMO_FINANCIALS } from '../utils/financials';
@@ -29,7 +30,7 @@ export default function Step2Financials({ financials, onLoad, onReset, onBack, o
       const data = await fetchFromEDGAR(ticker);
       onLoad(data);
     } catch (e) {
-      setError(String(e instanceof Error ? e.message : e));
+      setError(e instanceof Error ? e.message : String(e));
     } finally {
       setLoading(false);
     }
@@ -57,96 +58,147 @@ export default function Step2Financials({ financials, onLoad, onReset, onBack, o
   }
 
   const d = financials.data;
+  const activeError = error || financials.error;
 
   return (
     <div>
       <div className="card">
         <div className="card-title">Financial Data — 10-K</div>
 
-        <div className="mode-toggle">
-          <button className={`mode-btn ${mode === 'auto' ? 'active' : ''}`} onClick={() => setMode('auto')}>Auto (SEC EDGAR)</button>
-          <button className={`mode-btn ${mode === 'manual' ? 'active' : ''}`} onClick={() => setMode('manual')}>Enter manually</button>
-        </div>
+        <TabNavigation>
+          <Tab label="Auto (SEC EDGAR)" active={mode === 'auto'} onClick={() => setMode('auto')} />
+          <Tab label="Enter manually" active={mode === 'manual'} onClick={() => setMode('manual')} />
+        </TabNavigation>
 
         {mode === 'auto' && (
-          <div>
-            <div className="input-group">
-              <input
-                className="form-control"
-                type="text"
-                placeholder="AAPL"
-                style={{ width: 130 }}
-                value={ticker}
-                onChange={(e) => setTicker(e.target.value.toUpperCase())}
-                onKeyDown={(e) => e.key === 'Enter' && fetchFinancials()}
-                disabled={loading}
-              />
-              <button className="btn" onClick={fetchFinancials} disabled={loading || !ticker.trim()}>
-                {loading && <span className="spinner" />}
-                {loading ? 'Fetching…' : 'Fetch from SEC EDGAR'}
-              </button>
-              {financials.loaded && <button className="btn btn-outline" onClick={onReset}>Clear</button>}
+          <div style={{ marginTop: 16 }}>
+            <div style={{ display: 'flex', gap: 8, alignItems: 'flex-end', marginBottom: 8 }}>
+              <div style={{ width: 160 }}>
+                <Input
+                  type="text"
+                  label="Ticker Symbol"
+                  value={ticker}
+                  onChange={(v) => setTicker(v.toUpperCase())}
+                  placeholder="AAPL"
+                  disabled={loading}
+                />
+              </div>
+              <Button
+                type="primary"
+                onClick={fetchFinancials}
+                disabled={loading || !ticker.trim()}
+              >
+                {loading ? <><Spinner size="sm" color="white" /> Fetching…</> : 'Fetch from SEC EDGAR'}
+              </Button>
+              {financials.loaded && (
+                <Button type="secondary" onClick={onReset}>Clear</Button>
+              )}
             </div>
-            <div style={{ fontSize: 11, color: '#aaa' }}>Pulls the latest 10-K filing. May take 10–20s for large companies.</div>
-            <p style={{ marginTop: 8, marginBottom: 0 }}>
-              <button className="btn-link" onClick={() => onLoad(DEMO_FINANCIALS)}>Use demo financial data instead</button>
-            </p>
+            <div style={{ fontSize: 11, color: '#aaa', marginBottom: 8 }}>
+              Pulls the latest 10-K filing. May take 10–20s for large companies.
+            </div>
+            <Button type="tertiary" size="sm" onClick={() => onLoad(DEMO_FINANCIALS)}>
+              Use demo financial data instead
+            </Button>
           </div>
         )}
 
         {mode === 'manual' && (
-          <div>
-            <div style={{ fontSize: 12, color: '#555', marginBottom: 12, background: '#f9f9f9', padding: '8px 10px', borderRadius: 4, borderLeft: '3px solid #dee2e6' }}>
-              Copy values directly from the 10-K filing and paste them here. Commas and $ signs are ignored automatically.
+          <div style={{ marginTop: 16 }}>
+            <Banner
+              type="info"
+              size="sm"
+              content="Copy values directly from the 10-K filing and paste them here. Commas and $ signs are ignored automatically."
+              isFullWidth
+            />
+
+            <div style={{ marginTop: 16, display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+              <div style={{ gridColumn: '1 / 3' }}>
+                <Input
+                  type="text"
+                  label="Company Name"
+                  value={manual.company}
+                  onChange={(v) => setManual({ ...manual, company: v })}
+                  placeholder="e.g. Apple Inc."
+                />
+              </div>
+              <Input
+                type="text"
+                label="Fiscal Year"
+                value={manual.fiscal_year}
+                onChange={(v) => setManual({ ...manual, fiscal_year: v })}
+                placeholder="e.g. 2024"
+              />
+              <Input
+                type="text"
+                label="Total Revenue ($)"
+                value={manual.total_revenue}
+                onChange={(v) => setManual({ ...manual, total_revenue: v })}
+                placeholder="e.g. 391,035,000,000"
+                helpText="Paste from document — formatting is stripped"
+              />
+              <Input
+                type="text"
+                label="EBITDA ($)"
+                value={manual.ebitda}
+                onChange={(v) => setManual({ ...manual, ebitda: v })}
+                placeholder="e.g. 130,000,000,000"
+              />
+              <Input
+                type="text"
+                label="Total Expenses ($)"
+                value={manual.total_expenses}
+                onChange={(v) => setManual({ ...manual, total_expenses: v })}
+                placeholder="e.g. 261,000,000,000"
+              />
             </div>
-            <div className="manual-grid" style={{ marginBottom: 12 }}>
-              <div className="form-group" style={{ gridColumn: '1/3' }}>
-                <label className="form-label">Company Name</label>
-                <input className="form-input" type="text" placeholder="e.g. Apple Inc." value={manual.company} onChange={(e) => setManual({ ...manual, company: e.target.value })} />
-              </div>
-              <div className="form-group">
-                <label className="form-label">Fiscal Year</label>
-                <input className="form-input" type="text" placeholder="e.g. 2024" value={manual.fiscal_year} onChange={(e) => setManual({ ...manual, fiscal_year: e.target.value })} />
-              </div>
-              <div className="form-group">
-                <label className="form-label">Total Revenue ($)</label>
-                <input className="form-input" type="text" placeholder="e.g. 391,035,000,000" value={manual.total_revenue} onChange={(e) => setManual({ ...manual, total_revenue: e.target.value })} />
-                <span className="form-hint">Paste from document — formatting is stripped</span>
-              </div>
-              <div className="form-group">
-                <label className="form-label">EBITDA ($)</label>
-                <input className="form-input" type="text" placeholder="e.g. 130,000,000,000" value={manual.ebitda} onChange={(e) => setManual({ ...manual, ebitda: e.target.value })} />
-              </div>
-              <div className="form-group">
-                <label className="form-label">Total Expenses ($)</label>
-                <input className="form-input" type="text" placeholder="e.g. 261,000,000,000" value={manual.total_expenses} onChange={(e) => setManual({ ...manual, total_expenses: e.target.value })} />
-              </div>
+
+            <div style={{ margin: '16px 0 8px', fontSize: 11, fontWeight: 700, color: '#aaa', textTransform: 'uppercase', letterSpacing: '.05em' }}>
+              Expense detail (optional)
             </div>
-            <div style={{ fontSize: 11, fontWeight: 700, color: '#aaa', textTransform: 'uppercase', letterSpacing: '.05em', marginBottom: 8 }}>Expense detail (optional)</div>
-            <div className="manual-grid" style={{ marginBottom: 14 }}>
-              <div className="form-group">
-                <label className="form-label">Cost of Revenue ($)</label>
-                <input className="form-input" type="text" placeholder="optional" value={manual.cost_of_revenue} onChange={(e) => setManual({ ...manual, cost_of_revenue: e.target.value })} />
-              </div>
-              <div className="form-group">
-                <label className="form-label">R&amp;D ($)</label>
-                <input className="form-input" type="text" placeholder="optional" value={manual.rd} onChange={(e) => setManual({ ...manual, rd: e.target.value })} />
-              </div>
-              <div className="form-group">
-                <label className="form-label">SG&amp;A ($)</label>
-                <input className="form-input" type="text" placeholder="optional" value={manual.sga} onChange={(e) => setManual({ ...manual, sga: e.target.value })} />
-              </div>
+
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 12, marginBottom: 16 }}>
+              <Input
+                type="text"
+                label="Cost of Revenue ($)"
+                value={manual.cost_of_revenue}
+                onChange={(v) => setManual({ ...manual, cost_of_revenue: v })}
+                placeholder="optional"
+              />
+              <Input
+                type="text"
+                label="R&D ($)"
+                value={manual.rd}
+                onChange={(v) => setManual({ ...manual, rd: v })}
+                placeholder="optional"
+              />
+              <Input
+                type="text"
+                label="SG&A ($)"
+                value={manual.sga}
+                onChange={(v) => setManual({ ...manual, sga: v })}
+                placeholder="optional"
+              />
             </div>
+
             <div style={{ display: 'flex', gap: 8 }}>
-              <button className="btn" onClick={loadManual} disabled={!manual.company || !manual.total_revenue}>Save &amp; Apply</button>
-              {financials.loaded && <button className="btn btn-outline" onClick={onReset}>Clear</button>}
+              <Button
+                type="primary"
+                onClick={loadManual}
+                disabled={!manual.company || !manual.total_revenue}
+              >
+                Save &amp; Apply
+              </Button>
+              {financials.loaded && (
+                <Button type="secondary" onClick={onReset}>Clear</Button>
+              )}
             </div>
           </div>
         )}
       </div>
 
-      {(error || financials.error) && (
-        <div className="alert alert-danger">{error || financials.error}</div>
+      {activeError && (
+        <Banner type="error" size="md" content={activeError} isFullWidth />
       )}
 
       {d && (
@@ -161,7 +213,7 @@ export default function Step2Financials({ financials, onLoad, onReset, onBack, o
                 FY <strong>{d.fiscal_year || '—'}</strong>
                 <div style={{ fontSize: 11, color: '#aaa', marginTop: 2 }}>Filed: {d.filing_date || 'N/A'}</div>
               </div>
-              <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 10 }}>
+              <div style={{ marginLeft: 'auto' }}>
                 <span className="source-pill">{d.source || 'SEC EDGAR 10-K'}</span>
               </div>
             </div>
@@ -176,7 +228,7 @@ export default function Step2Financials({ financials, onLoad, onReset, onBack, o
             <div className="metric">
               <div className="metric-label">EBITDA (est.)</div>
               <div className="metric-value">{fmt(d.ebitda)}</div>
-              <div className="metric-sub">Op. Income + D&A</div>
+              <div className="metric-sub">Op. Income + D&amp;A</div>
             </div>
             <div className="metric">
               <div className="metric-label">Operating Income</div>
@@ -192,7 +244,11 @@ export default function Step2Financials({ financials, onLoad, onReset, onBack, o
             <div className="card">
               <div className="card-title">Expense Breakdown (% of Revenue)</div>
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(180px,1fr))', gap: 16 }}>
-                {([['Cost of Revenue', 'cost_of_revenue'], ['R&D', 'research_and_development'], ['SG&A', 'selling_general_admin']] as const).map(([label, key]) => {
+                {([
+                  ['Cost of Revenue', 'cost_of_revenue'],
+                  ['R&D', 'research_and_development'],
+                  ['SG&A', 'selling_general_admin'],
+                ] as const).map(([label, key]) => {
                   const val = d.expense_breakdown[key];
                   return (
                     <div key={key}>
@@ -212,10 +268,18 @@ export default function Step2Financials({ financials, onLoad, onReset, onBack, o
       )}
 
       <div className="step-nav">
-        <button className="btn btn-outline" onClick={onBack}>← Roster Analysis</button>
-        <button className="btn" onClick={onNext} disabled={!rosterLoaded || !financials.loaded}>
-          {rosterLoaded && financials.loaded ? 'Integrated Analysis →' : 'Load roster first'}
-        </button>
+        <Button type="secondary" onClick={onBack} icon="ap-icon-previous" iconPosition="left">
+          Roster Analysis
+        </Button>
+        <Button
+          type="primary"
+          onClick={onNext}
+          disabled={!rosterLoaded || !financials.loaded}
+          icon="ap-icon-next"
+          iconPosition="right"
+        >
+          {rosterLoaded && financials.loaded ? 'Integrated Analysis' : 'Load roster first'}
+        </Button>
       </div>
     </div>
   );

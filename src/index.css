@@ -1,21 +1,16 @@
+/* Base reset — AP library brings Roboto and its own box-sizing */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-body { font-family: 'Segoe UI', Arial, sans-serif; font-size: 14px; color: #212529; background: #f7f7f7; min-height: 100vh; }
+body { background: #f7f7f7; min-height: 100vh; }
 #root { width: 100%; }
 
-/* Navbar */
-.navbar { background: #333; padding: 0 24px; height: 52px; display: flex; align-items: center; border-bottom: 3px solid #498E2B; }
-.navbar-brand { color: #fff; font-size: 15px; font-weight: 600; letter-spacing: .02em; }
-.navbar-brand .dot { color: #5CB335; margin-right: 8px; }
-.navbar-sub { color: #aaa; font-size: 13px; margin-left: 16px; padding-left: 16px; border-left: 1px solid #555; }
-
-/* Layout */
+/* ── Layout ───────────────────────────────────────────────── */
 .container { max-width: 1120px; margin: 0 auto; padding: 24px 16px; }
 
-/* Cards */
+/* ── Cards ────────────────────────────────────────────────── */
 .card { background: #fff; border-radius: 8px; padding: 20px; box-shadow: 0 1px 3px rgba(0,0,0,.08); margin-bottom: 16px; }
 .card-title { font-size: 11px; font-weight: 700; color: #6c757d; text-transform: uppercase; letter-spacing: .06em; margin-bottom: 14px; }
 
-/* Metrics strip */
+/* ── Metrics strip ────────────────────────────────────────── */
 .metrics { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 12px; margin-bottom: 16px; }
 .metric { background: #fff; border-radius: 8px; padding: 16px 18px; box-shadow: 0 1px 3px rgba(0,0,0,.08); border-left: 3px solid #498E2B; }
 .metric.accent { border-left-color: #e67e22; }
@@ -23,62 +18,17 @@ body { font-family: 'Segoe UI', Arial, sans-serif; font-size: 14px; color: #2125
 .metric-value { font-size: 22px; font-weight: 700; color: #212529; line-height: 1.2; }
 .metric-sub { font-size: 11px; color: #aaa; margin-top: 3px; }
 
-/* Ratio metric */
+/* Ratio metric (gradient green) */
 .metric-ratio { background: linear-gradient(135deg, #498E2B, #5CB335); color: #fff; border-radius: 8px; padding: 16px 18px; box-shadow: 0 1px 3px rgba(0,0,0,.08); }
-.metric-ratio .metric-label { color: rgba(255,255,255,.75); }
-.metric-ratio .metric-value { font-size: 24px; color: #fff; }
+.metric-ratio .metric-label { color: rgba(255,255,255,.75); font-size: 11px; text-transform: uppercase; letter-spacing: .05em; margin-bottom: 4px; }
+.metric-ratio .metric-value { font-size: 24px; font-weight: 700; color: #fff; line-height: 1.2; }
+.metric-ratio .metric-sub { font-size: 11px; color: rgba(255,255,255,.7); margin-top: 3px; }
 
-/* Charts */
+/* ── Charts grid ──────────────────────────────────────────── */
 .charts-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px; }
 @media (max-width: 700px) { .charts-grid { grid-template-columns: 1fr; } }
 
-/* Upload zone */
-.upload-zone { border: 2px dashed #dee2e6; border-radius: 8px; padding: 56px 24px; text-align: center; cursor: pointer; background: #fff; transition: all .2s; }
-.upload-zone:hover, .upload-zone.dragging { border-color: #498E2B; background: #f0f9eb; }
-.upload-icon { font-size: 42px; margin-bottom: 12px; }
-.upload-title { font-size: 15px; font-weight: 600; color: #333; margin-bottom: 4px; }
-.upload-sub { font-size: 12px; color: #aaa; margin-bottom: 16px; }
-
-/* Buttons */
-.btn { padding: 8px 20px; background: #498E2B; color: #fff; border: none; border-radius: 4px; font-size: 13px; font-weight: 600; cursor: pointer; transition: background .15s; display: inline-flex; align-items: center; gap: 5px; }
-.btn:hover:not(:disabled) { background: #3d7623; }
-.btn:disabled { background: #aaa; cursor: not-allowed; }
-.btn-outline { background: #fff; color: #498E2B; border: 1px solid #498E2B; }
-.btn-outline:hover:not(:disabled) { background: #f0f9eb; }
-.btn-link { background: none; border: none; color: #498E2B; font-size: 12px; cursor: pointer; text-decoration: underline; padding: 0; }
-
-/* Form */
-.input-group { display: flex; gap: 8px; align-items: center; margin-bottom: 8px; }
-.form-control { padding: 8px 12px; border: 1px solid #dee2e6; border-radius: 4px; font-size: 14px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; }
-.form-control:focus { outline: none; border-color: #498E2B; }
-
-/* Alerts */
-.alert { padding: 10px 14px; border-radius: 4px; margin-bottom: 12px; font-size: 13px; }
-.alert-danger { background: #fff0f0; border-left: 3px solid #e53e3e; color: #742a2a; }
-
-/* Mode toggle */
-.mode-toggle { display: flex; border: 1px solid #dee2e6; border-radius: 4px; overflow: hidden; width: fit-content; margin-bottom: 14px; }
-.mode-btn { padding: 7px 18px; background: #fff; border: none; border-right: 1px solid #dee2e6; cursor: pointer; font-size: 12px; font-weight: 600; color: #6c757d; transition: all .15s; }
-.mode-btn:last-child { border-right: none; }
-.mode-btn.active { background: #498E2B; color: #fff; }
-
-/* Paste zone */
-.paste-zone { border: 2px dashed #dee2e6; border-radius: 8px; background: #fff; cursor: text; transition: border-color .2s, background .2s; }
-.paste-zone:focus { outline: none; border-color: #498E2B; background: #f0f9eb; }
-.paste-preview-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; font-size: 13px; }
-.col-pill { display: inline-block; font-size: 10px; padding: 2px 7px; border-radius: 10px; margin-right: 4px; font-weight: 600; }
-.col-found { background: #e8f5e9; color: #2d6016; }
-.col-missing { background: #fff0f0; color: #b91c1c; }
-
-/* Manual form */
-.manual-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-.form-group { display: flex; flex-direction: column; gap: 3px; }
-.form-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .05em; color: #6c757d; }
-.form-input { padding: 7px 10px; border: 1px solid #dee2e6; border-radius: 4px; font-size: 13px; width: 100%; }
-.form-input:focus { outline: none; border-color: #498E2B; }
-.form-hint { font-size: 10px; color: #aaa; margin-top: 2px; }
-
-/* Table */
+/* ── Table ────────────────────────────────────────────────── */
 .data-table { width: 100%; border-collapse: collapse; font-size: 13px; }
 .data-table th { text-align: left; padding: 8px 12px; border-bottom: 2px solid #dee2e6; font-size: 11px; text-transform: uppercase; letter-spacing: .05em; color: #6c757d; font-weight: 700; }
 .data-table td { padding: 8px 12px; border-bottom: 1px solid #f0f0f0; }
@@ -86,7 +36,7 @@ body { font-family: 'Segoe UI', Arial, sans-serif; font-size: 14px; color: #2125
 .progress-bar { height: 5px; background: #e9ecef; border-radius: 3px; overflow: hidden; width: 100px; }
 .progress-fill { height: 100%; background: #5CB335; }
 
-/* Empty state */
+/* ── Empty state ──────────────────────────────────────────── */
 .empty-state { text-align: center; padding: 64px 24px; }
 .empty-icon { font-size: 48px; color: #dee2e6; margin-bottom: 16px; }
 .empty-title { font-size: 15px; font-weight: 600; color: #555; margin-bottom: 6px; }
@@ -96,27 +46,23 @@ body { font-family: 'Segoe UI', Arial, sans-serif; font-size: 14px; color: #2125
 .check-item.done { background: #e8f5e9; color: #2d6016; }
 .check-item.todo { background: #f5f5f5; color: #888; }
 
-/* Spinner */
-.spinner { display: inline-block; width: 16px; height: 16px; border: 2px solid rgba(255,255,255,.35); border-top-color: #fff; border-radius: 50%; animation: spin .7s linear infinite; flex-shrink: 0; }
-@keyframes spin { to { transform: rotate(360deg); } }
-
-/* Company card */
+/* ── Company card ─────────────────────────────────────────── */
 .company-header { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
 .company-ticker { font-size: 26px; font-weight: 800; color: #333; }
 .company-name { font-size: 13px; color: #6c757d; margin-top: 2px; }
 .source-pill { background: #e8f5e9; color: #2d6016; font-size: 11px; font-weight: 700; padding: 3px 9px; border-radius: 12px; }
 
-/* Insights grid */
+/* ── Insights grid ────────────────────────────────────────── */
 .insights-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
 @media (max-width: 600px) { .insights-grid { grid-template-columns: 1fr; } }
 .insight-label { font-size: 11px; text-transform: uppercase; letter-spacing: .05em; color: #6c757d; margin-bottom: 4px; font-weight: 700; }
 .insight-value { font-size: 17px; font-weight: 700; color: #333; }
 .insight-sub { font-size: 12px; color: #aaa; margin-top: 2px; }
 
-/* File info bar */
+/* ── File info bar ────────────────────────────────────────── */
 .file-bar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; padding: 8px 12px; background: #f0f9eb; border-radius: 4px; font-size: 13px; }
 
-/* Step bar */
+/* ── Step progress bar ────────────────────────────────────── */
 .step-bar { display: flex; align-items: flex-start; margin-bottom: 28px; padding: 20px 28px; background: #fff; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,.08); }
 .step-item { display: flex; flex-direction: column; align-items: center; cursor: pointer; min-width: 90px; }
 .step-item.locked { cursor: not-allowed; opacity: .45; pointer-events: none; }
@@ -130,10 +76,15 @@ body { font-family: 'Segoe UI', Arial, sans-serif; font-size: 14px; color: #2125
 .step-connector { flex: 1; height: 2px; background: #dee2e6; margin: 17px 10px 0; }
 .step-connector.done { background: #5CB335; }
 
-/* Step navigation */
+/* ── Step navigation footer ───────────────────────────────── */
 .step-nav { display: flex; justify-content: space-between; align-items: center; margin-top: 24px; padding-top: 16px; border-top: 1px solid #f0f0f0; }
 
-/* AI narrative card */
+/* ── Paste zone ───────────────────────────────────────────── */
+.paste-zone { border: 2px dashed #dee2e6; border-radius: 8px; background: #fff; cursor: text; transition: border-color .2s, background .2s; }
+.paste-zone:focus { outline: none; border-color: #498E2B; background: #f0f9eb; }
+.paste-preview-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; font-size: 13px; }
+
+/* ── AI narrative card ────────────────────────────────────── */
 .ai-card { background: #f8fdf5; border: 1px solid #c8e6c9; border-radius: 8px; padding: 20px; margin-bottom: 16px; }
 .ai-card-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
 .ai-card-title { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: #498E2B; }
@@ -146,11 +97,3 @@ body { font-family: 'Segoe UI', Arial, sans-serif; font-size: 14px; color: #2125
 .chat-bubble { padding: 8px 13px; border-radius: 8px; font-size: 13px; line-height: 1.55; max-width: 92%; }
 .chat-bubble.q { background: #fff; border: 1px solid #dee2e6; align-self: flex-end; color: #333; }
 .chat-bubble.a { background: #e8f5e9; color: #1a3d0e; align-self: flex-start; }
-
-/* Modal */
-.modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,.45); z-index: 200; display: flex; align-items: center; justify-content: center; }
-.modal-box { background: #fff; border-radius: 10px; padding: 28px 28px 22px; max-width: 440px; width: 90%; box-shadow: 0 8px 32px rgba(0,0,0,.2); }
-.modal-icon { font-size: 30px; margin-bottom: 10px; }
-.modal-title { font-size: 16px; font-weight: 700; color: #333; margin-bottom: 8px; }
-.modal-body { font-size: 13px; color: #555; line-height: 1.65; margin-bottom: 20px; }
-.modal-footer { display: flex; justify-content: flex-end; }

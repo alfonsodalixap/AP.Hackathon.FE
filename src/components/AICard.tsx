@@ -1,3 +1,4 @@
+import { Button, Spinner } from '@alixpartners/ui-components';
 import type { AIState } from '../types';
 
 interface Props {
@@ -12,16 +13,16 @@ export default function AICard({ state, questions, onGenerate, onQuestion }: Pro
     <div className="ai-card">
       <div className="ai-card-header">
         <div className="ai-card-title">🤖 Analyst Narrative</div>
-        <button
-          className="btn"
-          style={{ fontSize: 11, padding: '5px 12px' }}
+        <Button
+          type="secondary"
+          size="sm"
           onClick={onGenerate}
           disabled={state.loading}
         >
           {state.loading
-            ? <><span className="spinner" />Analyzing…</>
+            ? <><Spinner size="sm" color="dark" /> Analyzing…</>
             : state.text ? 'Regenerate' : 'Generate Narrative'}
-        </button>
+        </Button>
       </div>
 
       {!state.text && !state.loading && (

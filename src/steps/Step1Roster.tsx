@@ -1,5 +1,6 @@
 import { useRef, useState } from 'react';
 import * as XLSX from 'xlsx';
+import { Button, DragAndDrop, TabNavigation, Tab, Tag, type UploadFile } from '@alixpartners/ui-components';
 import type { RosterData, AIState, PasteState } from '../types';
 import { processRoster, DEMO_ROSTER } from '../utils/roster';
 import { fmt } from '../utils/format';
@@ -27,9 +28,8 @@ interface Props {
 
 export default function Step1Roster({ roster, ai, onLoad, onReset, onAI, onNext }: Props) {
   const [mode, setMode] = useState<'upload' | 'paste'>('upload');
-  const [dragging, setDragging] = useState(false);
   const [paste, setPaste] = useState<PasteState>({ raw: null, headers: null, preview: null });
-  const fileRef = useRef<HTMLInputElement>(null);
+  const pasteRef = useRef<HTMLDivElement>(null);
 
   function parseExcel(file: File) {
     if (!file.name.match(/\.(xlsx|xls)$/i)) { alert('Please upload an Excel file.'); return; }
@@ -44,6 +44,11 @@ export default function Step1Roster({ roster, ai, onLoad, onReset, onAI, onNext 
       }
     };
     reader.readAsArrayBuffer(file);
+  }
+
+  function handleDragAndDropUpload(files: UploadFile[]) {
+    const f = files[0]?.file;
+    if (f) parseExcel(f);
   }
 
   function handlePaste(e: React.ClipboardEvent<HTMLDivElement>) {
@@ -96,37 +101,43 @@ export default function Step1Roster({ roster, ai, onLoad, onReset, onAI, onNext 
   if (!roster.loaded) {
     return (
       <div>
-        <div className="mode-toggle">
-          <button className={`mode-btn ${mode === 'upload' ? 'active' : ''}`} onClick={() => setMode('upload')}>Upload File</button>
-          <button className={`mode-btn ${mode === 'paste' ? 'active' : ''}`} onClick={() => setMode('paste')}>Paste from Spreadsheet</button>
-        </div>
+        <TabNavigation>
+          <Tab label="Upload File" active={mode === 'upload'} onClick={() => setMode('upload')} />
+          <Tab label="Paste from Spreadsheet" active={mode === 'paste'} onClick={() => setMode('paste')} />
+        </TabNavigation>
 
         {mode === 'upload' && (
-          <div>
-            <input ref={fileRef} type="file" accept=".xlsx,.xls" style={{ display: 'none' }} onChange={(e) => e.target.files?.[0] && parseExcel(e.target.files[0])} />
-            <div
-              className={`upload-zone ${dragging ? 'dragging' : ''}`}
-              onDragOver={(e) => { e.preventDefault(); setDragging(true); }}
-              onDragLeave={() => setDragging(false)}
-              onDrop={(e) => { e.preventDefault(); setDragging(false); e.dataTransfer.files[0] && parseExcel(e.dataTransfer.files[0]); }}
-              onClick={() => fileRef.current?.click()}
-            >
-              <div className="upload-icon">📊</div>
-              <div className="upload-title">Upload LinkedIn Roster Export</div>
-              <div className="upload-sub">Drop an Excel file here or click to browse<br />Expected: Job Function · Seniority · Country · Fully Loaded Cost</div>
-              <button className="btn" onClick={(e) => { e.stopPropagation(); fileRef.current?.click(); }}>Choose File</button>
+          <div style={{ marginTop: 16 }}>
+            <DragAndDrop
+              label="LinkedIn Roster Export"
+              fileExtensionsAllowed={['.xlsx', '.xls']}
+              type="single"
+              onUpload={handleDragAndDropUpload}
+              texts={{
+                drag: 'Drop your Excel file here or',
+                browse: 'browse',
+                constraints: () => 'Supports .xlsx and .xls files · Columns: Job Function · Seniority · Country · Fully Loaded Cost',
+              }}
+            />
+            <div style={{ textAlign: 'center', marginTop: 12 }}>
+              <Button type="tertiary" size="sm" onClick={() => onLoad(DEMO_ROSTER, 'demo-roster.xlsx (synthetic)')}>
+                Use demo data instead
+              </Button>
             </div>
-            <p style={{ textAlign: 'center', marginTop: 10 }}>
-              <button className="btn-link" onClick={() => onLoad(DEMO_ROSTER, 'demo-roster.xlsx (synthetic)')}>Use demo data instead</button>
-            </p>
           </div>
         )}
 
         {mode === 'paste' && (
-          <div>
+          <div style={{ marginTop: 16 }}>
             {!paste.raw ? (
               <div>
-                <div className="paste-zone" tabIndex={0} onPaste={handlePaste}>
+                <div
+                  ref={pasteRef}
+                  className="paste-zone"
+                  tabIndex={0}
+                  onPaste={handlePaste}
+                  onClick={() => pasteRef.current?.focus()}
+                >
                   <div style={{ padding: '52px 24px', textAlign: 'center', pointerEvents: 'none' }}>
                     <div style={{ fontSize: 38, marginBottom: 12 }}>📋</div>
                     <div style={{ fontSize: 15, fontWeight: 600, color: '#333', marginBottom: 6 }}>Click here, then paste your data</div>
@@ -134,23 +145,34 @@ export default function Step1Roster({ roster, ai, onLoad, onReset, onAI, onNext 
                     <div style={{ fontSize: 11, color: '#bbb', marginTop: 10 }}>Expected columns: Job Function · Seniority · Country · Fully Loaded Cost</div>
                   </div>
                 </div>
-                <p style={{ textAlign: 'center', marginTop: 10 }}>
-                  <button className="btn-link" onClick={() => onLoad(DEMO_ROSTER, 'demo-roster.xlsx (synthetic)')}>Use demo data instead</button>
-                </p>
+                <div style={{ textAlign: 'center', marginTop: 12 }}>
+                  <Button type="tertiary" size="sm" onClick={() => onLoad(DEMO_ROSTER, 'demo-roster.xlsx (synthetic)')}>
+                    Use demo data instead
+                  </Button>
+                </div>
               </div>
             ) : (
               <div>
                 <div className="paste-preview-header">
                   <div><strong>{paste.raw.length}</strong> rows detected &nbsp;·&nbsp; <span>{paste.headers?.length}</span> columns</div>
-                  <button className="btn-link" onClick={() => setPaste({ raw: null, headers: null, preview: null })}>↩ Paste again</button>
+                  <Button type="tertiary" size="sm" onClick={() => setPaste({ raw: null, headers: null, preview: null })}>
+                    ↩ Paste again
+                  </Button>
                 </div>
-                <div style={{ marginBottom: 12 }}>
+
+                <div style={{ marginBottom: 12, display: 'flex', flexWrap: 'wrap', gap: 6 }}>
                   {pasteColStatus().map((col) => (
-                    <span key={col.label} className={`col-pill ${col.found ? 'col-found' : 'col-missing'}`}>
-                      {col.found ? '✓ ' : '✗ '}{col.label}
-                    </span>
+                    <Tag
+                      key={col.label}
+                      type={col.found ? 'success' : 'error'}
+                      size="sm"
+                      structure="solid"
+                      label={(col.found ? '✓ ' : '✗ ') + col.label}
+                      noIcon
+                    />
                   ))}
                 </div>
+
                 <div className="card" style={{ overflowX: 'auto', padding: 0 }}>
                   <table className="data-table">
                     <thead>
@@ -168,10 +190,11 @@ export default function Step1Roster({ roster, ai, onLoad, onReset, onAI, onNext 
                     </div>
                   )}
                 </div>
+
                 <div style={{ marginTop: 12, display: 'flex', gap: 8, alignItems: 'center' }}>
-                  <button className="btn" onClick={confirmPaste} disabled={!pasteColStatus().every((c) => c.found)}>
+                  <Button type="primary" onClick={confirmPaste} disabled={!pasteColStatus().every((c) => c.found)}>
                     Analyze this data →
-                  </button>
+                  </Button>
                   {!pasteColStatus().every((c) => c.found) && (
                     <span style={{ fontSize: 12, color: '#b91c1c' }}>Missing required columns — check your data</span>
                   )}
@@ -197,7 +220,9 @@ export default function Step1Roster({ roster, ai, onLoad, onReset, onAI, onNext 
     <div>
       <div className="file-bar">
         <span><strong>{roster.fileName}</strong> &nbsp;·&nbsp; {d.total_headcount.toLocaleString()} employees</span>
-        <button className="btn btn-outline" style={{ fontSize: 12, padding: '4px 10px' }} onClick={onReset}>↑ New file</button>
+        <Button type="secondary" size="sm" onClick={onReset} icon="ap-icon-upload">
+          New file
+        </Button>
       </div>
 
       {/* KPIs Row 1 */}
@@ -248,7 +273,7 @@ export default function Step1Roster({ roster, ai, onLoad, onReset, onAI, onNext 
         </div>
       </div>
 
-      {/* Charts Row 1 */}
+      {/* Charts */}
       <div className="charts-grid">
         <div className="card">
           <div className="card-title">Headcount by Function</div>
@@ -260,7 +285,6 @@ export default function Step1Roster({ roster, ai, onLoad, onReset, onAI, onNext 
         </div>
       </div>
 
-      {/* Cost by function */}
       <div className="card">
         <div className="card-title">Labor Spend by Function</div>
         <HBarChart data={costFnData} color="#498E2B" formatValue={fmt} />
@@ -291,17 +315,13 @@ export default function Step1Roster({ roster, ai, onLoad, onReset, onAI, onNext 
         </table>
       </div>
 
-      {/* AI Narrative */}
-      <AICard
-        state={ai}
-        questions={ROSTER_QUESTIONS}
-        onGenerate={generateNarrative}
-        onQuestion={askQuestion}
-      />
+      <AICard state={ai} questions={ROSTER_QUESTIONS} onGenerate={generateNarrative} onQuestion={askQuestion} />
 
       <div className="step-nav">
         <span />
-        <button className="btn" onClick={onNext}>Continue: Financial Data →</button>
+        <Button type="primary" onClick={onNext} icon="ap-icon-next" iconPosition="right">
+          Continue: Financial Data
+        </Button>
       </div>
     </div>
   );

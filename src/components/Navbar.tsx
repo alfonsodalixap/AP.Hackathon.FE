@@ -1,10 +1,10 @@
+import { NavBar } from '@alixpartners/ui-components';
+
 export default function Navbar() {
   return (
-    <nav className="navbar">
-      <span className="navbar-brand">
-        <span className="dot">●</span>AlixPartners
-      </span>
-      <span className="navbar-sub">Outside-In Diligence Tool</span>
-    </nav>
+    <NavBar
+      projectName="Outside-In Diligence Tool"
+      projectLogoIcon="ap-icon-logo-alixpartners"
+    />
   );
 }
