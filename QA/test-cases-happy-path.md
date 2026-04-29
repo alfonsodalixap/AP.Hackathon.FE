@@ -1,237 +1,237 @@
 # Test Cases — Happy Path
 **Outside-In Due Diligence Tool**
-**Status:** Draft v3 — expandido con lógica real del prototipo
+**Status:** Draft v3 — updated with real prototype logic
 **Last updated:** 2026-04-29
 **Author:** Alejandro Lupo (QA)
 
 ---
 
-## Referencia de datos de prueba — WorkshopRoster.xlsx
+## Test Data Reference — WorkshopRoster.xlsx
 
-| Columna | Descripción |
+| Column | Description |
 |---|---|
-| Employ ID | Identificador numérico del empleado |
-| Job Title | Título del puesto (texto libre) |
-| Job Function | Categoría funcional (ej. Engineering, Finance, Operations) |
-| Seniority | Nivel jerárquico (ej. VP, Director, Manager, Staff) |
-| Country | País de empleo |
-| FLC | Full Labor Cost anual en USD |
+| Employ ID | Numeric employee identifier |
+| Job Title | Free text job title |
+| Job Function | Department/function category (e.g. Engineering, Finance, Operations) |
+| Seniority | Hierarchical level (e.g. VP, Director, Manager, Staff) |
+| Country | Country of employment |
+| FLC | Full Labor Cost (annual, USD) |
 
 ---
 
-## Flujo 1 — Análisis de Dotación
+## Flow 1 — Roster Analysis
 
-### TC-001 — Carga de archivo Excel válido
+### TC-001 — Upload a valid Excel file
 
-| Campo | Detalle |
+| Field | Detail |
 |---|---|
-| **Archivo de prueba** | `WorkshopRoster.xlsx` |
-| **Precondiciones** | El usuario tiene `WorkshopRoster.xlsx` disponible localmente |
-| **Pasos** | 1. Navegar a la pantalla de Análisis de Dotación <br> 2. Seleccionar el modo "Upload" <br> 3. Hacer clic o arrastrar el archivo `WorkshopRoster.xlsx` a la zona de carga <br> 4. Confirmar la carga |
-| **Resultado esperado** | El archivo es aceptado. El sistema parsea las columnas, muestra el total de empleados correctamente y habilita la vista de análisis. |
+| **Test file** | `WorkshopRoster.xlsx` |
+| **Preconditions** | User has `WorkshopRoster.xlsx` available locally |
+| **Steps** | 1. Navigate to the Roster Analysis screen <br> 2. Select Upload mode <br> 3. Drag or select `WorkshopRoster.xlsx` <br> 4. Confirm the upload |
+| **Expected result** | File is accepted. System parses the columns, displays the correct total headcount and enables the analysis view. |
 
 ---
 
-### TC-002 — Carga de dotación por pegado desde portapapeles
+### TC-002 — Load roster by pasting from clipboard
 
-| Campo | Detalle |
+| Field | Detail |
 |---|---|
-| **Precondiciones** | El usuario tiene los datos del roster copiados en el portapapeles desde una planilla (formato TSV) |
-| **Pasos** | 1. Navegar a la pantalla de Análisis de Dotación <br> 2. Seleccionar el modo "Paste" <br> 3. Hacer clic en la zona de pegado <br> 4. Presionar Ctrl+V |
-| **Resultado esperado** | El sistema detecta y mapea las columnas automáticamente. Se muestra una tabla de preview con las primeras 4 filas y la cantidad de filas/columnas detectadas. El usuario puede confirmar la carga. |
+| **Preconditions** | User has roster data copied to the clipboard from a spreadsheet (TSV format) |
+| **Steps** | 1. Navigate to the Roster Analysis screen <br> 2. Select Paste mode <br> 3. Click the paste area <br> 4. Press Ctrl+V |
+| **Expected result** | System auto-detects and maps columns. A preview table shows the first 4 rows and the detected row/column count. User can confirm the upload. |
 
 ---
 
-### TC-003 — KPIs de dotación: headcount y costos
+### TC-003 — Roster KPIs: headcount and costs
 
-| Campo | Detalle |
+| Field | Detail |
 |---|---|
-| **Precondiciones** | TC-001 o TC-002 aprobado |
-| **Pasos** | 1. Observar la fila de KPIs en la pantalla de Análisis de Dotación |
-| **Resultado esperado** | Se muestran correctamente: **Total Headcount** (total de filas del archivo), **Total Labor Spend** (suma de FLC), **Avg Cost/Employee** (Total Labor Spend / Total Headcount), **Median Cost/Employee** (mediana de los valores FLC). Los valores son matemáticamente consistentes entre sí. |
+| **Preconditions** | TC-001 or TC-002 passed |
+| **Steps** | 1. Observe the KPI row on the Roster Analysis screen |
+| **Expected result** | Displayed correctly: **Total Headcount** (total rows in file), **Total Labor Spend** (sum of FLC), **Avg Cost/Employee** (Total Labor Spend / Headcount), **Median Cost/Employee** (median of FLC values). Values are mathematically consistent. |
 
 ---
 
-### TC-004 — KPIs de dotación: senior ratio y concentración de costos
+### TC-004 — Roster KPIs: senior ratio and cost concentration
 
-| Campo | Detalle |
+| Field | Detail |
 |---|---|
-| **Precondiciones** | TC-001 o TC-002 aprobado |
-| **Pasos** | 1. Observar la segunda fila de KPIs |
-| **Resultado esperado** | Se muestran: **Nº de Funciones** (valores únicos de Job Function), **Nº de Países** (valores únicos de Country), **Senior Ratio** (% de headcount con Seniority = VP o Director), **Cost Concentration** (% del gasto total que representa el 25% de empleados de mayor FLC). Los valores son consistentes con los datos del archivo. |
+| **Preconditions** | TC-001 or TC-002 passed |
+| **Steps** | 1. Observe the second KPI row |
+| **Expected result** | Displayed: **No. of Functions** (unique Job Function values), **No. of Countries** (unique Country values), **Senior Ratio** (% headcount with Seniority = VP or Director), **Cost Concentration** (% of total spend from top 25% earners by FLC). Values consistent with file data. |
 
 ---
 
-### TC-005 — Desglose de headcount por Job Function
+### TC-005 — Headcount breakdown by Job Function
 
-| Campo | Detalle |
+| Field | Detail |
 |---|---|
-| **Precondiciones** | TC-001 o TC-002 aprobado |
-| **Pasos** | 1. Localizar el gráfico de barras "Headcount by Function" |
-| **Resultado esperado** | Gráfico de barras horizontales ordenado de mayor a menor. Muestra una barra por cada valor único en Job Function. El total de todas las barras es igual al headcount total. |
+| **Preconditions** | TC-001 or TC-002 passed |
+| **Steps** | 1. Locate the Headcount by Function bar chart |
+| **Expected result** | Horizontal bar chart sorted descending. One bar per unique Job Function value. Sum of all bars equals total headcount. |
 
 ---
 
-### TC-006 — Desglose de headcount por Seniority
+### TC-006 — Headcount breakdown by Seniority
 
-| Campo | Detalle |
+| Field | Detail |
 |---|---|
-| **Precondiciones** | TC-001 o TC-002 aprobado |
-| **Pasos** | 1. Localizar el gráfico de barras "Seniority Distribution" |
-| **Resultado esperado** | Gráfico de barras horizontales ordenado según la jerarquía organizacional (Executive → VP → Director → Manager → Staff hacia abajo). Muestra una barra por nivel. El total es igual al headcount total. |
+| **Preconditions** | TC-001 or TC-002 passed |
+| **Steps** | 1. Locate the Seniority Distribution bar chart |
+| **Expected result** | Horizontal bar chart ordered by org hierarchy (Executive → VP → Director → Manager → Staff). One bar per level. Sum equals total headcount. |
 
 ---
 
-### TC-007 — Desglose de gasto en personal por función
+### TC-007 — Labor spend breakdown by function
 
-| Campo | Detalle |
+| Field | Detail |
 |---|---|
-| **Precondiciones** | TC-001 o TC-002 aprobado |
-| **Pasos** | 1. Localizar el gráfico "Labor Spend by Function" |
-| **Resultado esperado** | Gráfico de barras horizontales mostrando el FLC total agrupado por Job Function. El total de todas las barras es igual al Total Labor Spend del KPI. |
+| **Preconditions** | TC-001 or TC-002 passed |
+| **Steps** | 1. Locate the Labor Spend by Function chart |
+| **Expected result** | Horizontal bar chart showing total FLC grouped by Job Function. Sum of all bars equals Total Labor Spend KPI. |
 
 ---
 
-### TC-008 — Desglose geográfico (tabla de países)
+### TC-008 — Geographic breakdown table
 
-| Campo | Detalle |
+| Field | Detail |
 |---|---|
-| **Precondiciones** | TC-001 o TC-002 aprobado |
-| **Pasos** | 1. Localizar la tabla de desglose geográfico |
-| **Resultado esperado** | Tabla con columnas: País, Headcount, % del Total, Labor Spend. Muestra hasta los 10 países principales. El total de headcount suma correctamente al total general. |
+| **Preconditions** | TC-001 or TC-002 passed |
+| **Steps** | 1. Locate the geographic breakdown table |
+| **Expected result** | Table with columns: Country, Headcount, % of Total, Labor Spend. Shows up to 10 countries. Headcount totals correctly to the overall total. |
 
 ---
 
-## Flujo 2 — Datos Financieros
+## Flow 2 — Financial Data
 
-### TC-009 — Obtener datos financieros por ticker (modo automático SEC EDGAR)
+### TC-009 — Retrieve financial data by ticker (SEC EDGAR auto mode)
 
-| Campo | Detalle |
+| Field | Detail |
 |---|---|
-| **Precondiciones** | El usuario tiene el ticker de una empresa pública que haya presentado un 10-K (ej. `AAPL`, `MSFT`) |
-| **Pasos** | 1. Navegar a la pantalla de Datos Financieros <br> 2. Seleccionar modo "Auto" <br> 3. Ingresar el ticker en el campo de búsqueda <br> 4. Enviar la solicitud |
-| **Resultado esperado** | El sistema consulta SEC EDGAR y devuelve: nombre de la empresa, ticker, CIK, año fiscal, Revenue, EBITDA, Operating Income, D&A, Total Expenses y desglose de gastos (Cost of Revenue, R&D, SG&A). Se muestra la fecha del filing y la fuente "SEC EDGAR 10-K". |
+| **Preconditions** | User has the ticker of a public company that has filed a 10-K (e.g. `AAPL`, `MSFT`) |
+| **Steps** | 1. Navigate to the Financial Data screen <br> 2. Select Auto mode <br> 3. Enter the ticker <br> 4. Submit the request |
+| **Expected result** | System queries SEC EDGAR and returns: company name, ticker, CIK, fiscal year, Revenue, EBITDA, Operating Income, D&A, Total Expenses and expense breakdown (Cost of Revenue, R&D, SG&A). Filing date and source "SEC EDGAR 10-K" are shown. |
 
 ---
 
-### TC-010 — Los datos financieros corresponden al 10-K más reciente
+### TC-010 — Financial data corresponds to the most recent 10-K
 
-| Campo | Detalle |
+| Field | Detail |
 |---|---|
-| **Precondiciones** | TC-009 aprobado |
-| **Pasos** | 1. Observar el campo de año fiscal y fecha de filing mostrados |
-| **Resultado esperado** | Los datos corresponden al filing anual (10-K) más reciente disponible en SEC EDGAR, no a un año anterior. |
+| **Preconditions** | TC-009 passed |
+| **Steps** | 1. Observe the fiscal year and filing date shown |
+| **Expected result** | Data corresponds to the most recent annual 10-K filing available in SEC EDGAR, not a prior year. |
 
 ---
 
-### TC-011 — Ingresar datos financieros en forma manual
+### TC-011 — Manual financial data entry
 
-| Campo | Detalle |
+| Field | Detail |
 |---|---|
-| **Precondiciones** | El usuario tiene los datos financieros de la empresa disponibles |
-| **Pasos** | 1. Navegar a la pantalla de Datos Financieros <br> 2. Seleccionar modo "Manual" <br> 3. Completar: Company Name, Fiscal Year, Total Revenue, EBITDA, Total Expenses <br> 4. (Opcional) Completar Cost of Revenue, R&D, SG&A <br> 5. Hacer clic en "Save & Apply" |
-| **Resultado esperado** | Los datos son aceptados y se muestran en la pantalla. La fuente se muestra como "Manual Entry". El sistema acepta valores con formato de moneda (con `$` y comas). |
+| **Preconditions** | User has the company's financial data available |
+| **Steps** | 1. Select Manual mode <br> 2. Fill in: Company Name, Fiscal Year, Total Revenue, EBITDA, Total Expenses <br> 3. (Optional) Fill in Cost of Revenue, R&D, SG&A <br> 4. Click "Save & Apply" |
+| **Expected result** | Data is accepted and displayed on screen. Source is shown as "Manual Entry". System accepts currency-formatted values (with `$` and commas). |
 
 ---
 
-## Flujo 3 — Análisis Integrado
+## Flow 3 — Integrated Analysis
 
-### TC-012 — Bloqueo de acceso al análisis integrado sin ambas fuentes
+### TC-012 — Navigation gate without both sources loaded
 
-| Campo | Detalle |
+| Field | Detail |
 |---|---|
-| **Precondiciones** | Solo una de las dos fuentes está cargada (roster O financials, no ambas) |
-| **Pasos** | 1. Intentar navegar a la pantalla de Análisis Integrado |
-| **Resultado esperado** | La pantalla muestra un indicador de bloqueo con un checklist indicando qué fuente falta. No es posible acceder al análisis hasta tener ambas. |
+| **Preconditions** | Only one source is loaded (roster OR financials, not both) |
+| **Steps** | 1. Attempt to navigate to the Integrated Analysis screen |
+| **Expected result** | Screen shows a lock indicator with a checklist indicating which source is missing. Access is not possible until both sources are loaded. |
 
 ---
 
-### TC-013 — Modal de advertencia por desfase de período
+### TC-013 — Data period mismatch warning modal
 
-| Campo | Detalle |
+| Field | Detail |
 |---|---|
-| **Precondiciones** | TC-001/TC-002 y TC-009/TC-011 aprobados. Es la primera vez que el usuario accede al análisis integrado en la sesión. |
-| **Pasos** | 1. Navegar a la pantalla de Análisis Integrado |
-| **Resultado esperado** | Se muestra un modal "Check your data periods" advirtiendo al usuario que verifique que ambos datasets sean comparables en términos de tiempo. El usuario puede cerrar el modal y continuar. |
+| **Preconditions** | Both sources loaded. First time accessing integrated analysis in the session. |
+| **Steps** | 1. Navigate to the Integrated Analysis screen |
+| **Expected result** | A modal "Check your data periods" is displayed, warning the user to verify both datasets cover comparable timeframes. User can dismiss it and continue. |
 
 ---
 
 ### TC-014 — KPI: Revenue per Employee
 
-| Campo | Detalle |
+| Field | Detail |
 |---|---|
-| **Precondiciones** | TC-013 aprobado (análisis integrado accesible) |
-| **Pasos** | 1. Localizar la tarjeta de KPI "Revenue per Employee" |
-| **Resultado esperado** | El valor mostrado es igual a `Total Revenue (financials) / Total Headcount (roster)`. El resultado es matemáticamente correcto. |
+| **Preconditions** | TC-013 passed |
+| **Steps** | 1. Locate the Revenue per Employee KPI card |
+| **Expected result** | Value displayed equals `Total Revenue (financials) / Total Headcount (roster)`. Result is mathematically correct. |
 
 ---
 
-### TC-015 — KPI: Labor Spend como % de Revenue
+### TC-015 — KPI: Labor Spend as % of Revenue
 
-| Campo | Detalle |
+| Field | Detail |
 |---|---|
-| **Precondiciones** | TC-013 aprobado |
-| **Pasos** | 1. Localizar la tarjeta de KPI "Labor Spend as % of Revenue" |
-| **Resultado esperado** | El valor mostrado es igual a `Total Labor Spend (roster) / Total Revenue (financials) * 100`. Si el resultado es menor a 1%, se muestra con decimales (no como "0%"). |
+| **Preconditions** | TC-013 passed |
+| **Steps** | 1. Locate the Labor Spend as % of Revenue KPI card |
+| **Expected result** | Value equals `Total Labor Spend / Total Revenue * 100`. If result is below 1%, it is shown with decimals (not as "0%"). |
 
 ---
 
 ### TC-016 — KPI: EBITDA Margin
 
-| Campo | Detalle |
+| Field | Detail |
 |---|---|
-| **Precondiciones** | TC-013 aprobado |
-| **Pasos** | 1. Localizar la tarjeta de KPI "EBITDA Margin" |
-| **Resultado esperado** | El valor mostrado es igual a `EBITDA (financials) / Total Revenue (financials) * 100`. El resultado es matemáticamente correcto. |
+| **Preconditions** | TC-013 passed |
+| **Steps** | 1. Locate the EBITDA Margin KPI card |
+| **Expected result** | Value equals `EBITDA / Total Revenue * 100`. Result is mathematically correct. |
 
 ---
 
-### TC-017 — Banner de comparación (resumen de ambas fuentes)
+### TC-017 — Comparison banner — summary of both sources
 
-| Campo | Detalle |
+| Field | Detail |
 |---|---|
-| **Precondiciones** | TC-013 aprobado |
-| **Pasos** | 1. Observar el banner superior de la pantalla de Análisis Integrado |
-| **Resultado esperado** | El banner muestra a la izquierda los datos del roster (nombre del archivo, headcount, países) y a la derecha los datos financieros (empresa, año fiscal, revenue, EBITDA margin). El botón "Export to PPT" está visible y habilitado. |
+| **Preconditions** | TC-013 passed |
+| **Steps** | 1. Observe the top banner on the Integrated Analysis screen |
+| **Expected result** | Banner shows on the left: roster data (file name, headcount, countries); on the right: financial data (company, fiscal year, revenue, EBITDA margin). Export to PPT button is visible and enabled. |
 
 ---
 
-### TC-018 — Pirámide de seniority en análisis integrado
+### TC-018 — Seniority pyramid in integrated analysis
 
-| Campo | Detalle |
+| Field | Detail |
 |---|---|
-| **Precondiciones** | TC-013 aprobado |
-| **Pasos** | 1. Localizar la visualización de pirámide de seniority |
-| **Resultado esperado** | Gráfico de barras horizontales ordenado por jerarquía organizacional (niveles más senior arriba). La distribución es consistente con los datos del roster cargado. |
+| **Preconditions** | TC-013 passed |
+| **Steps** | 1. Locate the seniority pyramid visualization |
+| **Expected result** | Horizontal bar chart ordered by org hierarchy (most senior at top). Distribution is consistent with the loaded roster data. |
 
 ---
 
-### TC-019 — Oportunidades de creación de valor: senior layer rationalization
+### TC-019 — Value creation opportunity: senior layer rationalization
 
-| Campo | Detalle |
+| Field | Detail |
 |---|---|
-| **Precondiciones** | TC-013 aprobado. El roster cargado tiene VP + Director > 20% del headcount total. |
-| **Pasos** | 1. Localizar la sección "Value Creation Opportunities" |
-| **Resultado esperado** | Se muestra la oportunidad "Senior layer rationalization" con el detalle del porcentaje actual de VP/Director y un impacto estimado calculado como la reducción del 15% de ese grupo multiplicada por su FLC promedio. |
+| **Preconditions** | TC-013 passed. Roster has VP + Director > 20% of total headcount. |
+| **Steps** | 1. Locate the Value Creation Opportunities section |
+| **Expected result** | "Senior layer rationalization" opportunity is shown with the current VP/Director percentage and an estimated impact calculated as a 15% reduction of that group multiplied by their average FLC. |
 
 ---
 
-### TC-020 — Exportar análisis a PowerPoint
+### TC-020 — Export analysis to PowerPoint
 
-| Campo | Detalle |
+| Field | Detail |
 |---|---|
-| **Precondiciones** | TC-013 aprobado |
-| **Pasos** | 1. Hacer clic en el botón "Export to PPT" en el banner superior |
-| **Resultado esperado** | Se genera y descarga un archivo `.pptx` con las slides del análisis integrado. El archivo se descarga correctamente en el navegador. |
+| **Preconditions** | TC-013 passed |
+| **Steps** | 1. Click the "Export to PPT" button in the top banner |
+| **Expected result** | A `.pptx` file is generated and downloaded with the integrated analysis slides. File downloads correctly in the browser. |
 
 ---
 
-## Preguntas abiertas (confirmar con el equipo dev)
+## Open Questions (to confirm with dev team)
 
-| # | Pregunta | Impacta en |
+| # | Question | Impacts |
 |---|---|---|
-| 1 | ¿Qué columnas exactas del Excel son obligatorias vs opcionales para el parseo? | TC-001, TC-002 |
-| 2 | ¿El FLC se usa directamente como-es o hay alguna transformación? | TC-003, TC-007 |
-| 3 | ¿Qué sucede si SEC EDGAR no devuelve respuesta dentro de los 15 segundos — hay fallback automático a manual? | TC-009 |
-| 4 | ¿La lógica de Value Creation Opportunities se aplica también cuando los datos son ingresados manualmente? | TC-019 |
-| 5 | ¿El PPT export incluye también datos del roster o solo el análisis integrado? | TC-020 |
+| 1 | Which Excel columns are mandatory vs optional for parsing? | TC-001, TC-002 |
+| 2 | Is FLC used as-is or is there any transformation applied? | TC-003, TC-007 |
+| 3 | If SEC EDGAR does not respond within 15 seconds — is there an automatic fallback to manual entry? | TC-009 |
+| 4 | Do Value Creation Opportunities apply when financial data is entered manually? | TC-019 |
+| 5 | Does the PPT export include roster data or only the integrated analysis? | TC-020 |
